@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h1>Home</h1>
+    {% if error %}<p><strong>Error:</strong> {{ error }}{% endif %}
+    <ul>
+        {% for postit in postits%}
+            <li><h2>De {{ postit.owner }} le {{ postit.date }}</h2>
+                <i>"{{ postit.text|safe }}"</i>
+                <h3>Color : {{ postit.color }}</h3>
+            </li>
+        {% else %}
+            <li>No post-it(s) so far!</li>
+        {% endfor %}
+    </ul>
+    <p><a href="{{ url_for('add_post_it') }}">New bullshit?</a></p>
+{% endblock %}
