@@ -8,6 +8,7 @@ from contextlib import closing
 DATABASE = '/tmp/wallit.db'
 DEBUG = True
 SECRET_KEY = 'development key'
+COUNT = 0
 
 # TODO: change this when we get Google's data
 USERS = {'thibaut': 'pass', 'toto':'toto'}
@@ -48,12 +49,19 @@ def display_connection():
         the_user_pass = request.form['password']
         is_logged = (the_user_name, the_user_pass) in app.config['USERS'].items()
         if is_logged:
+            app.config['COUNT'] += 1
             session['user_id'] = the_user_name
             flash('You were logged in')
             return redirect(url_for('display_wall'))
         else:
             error = 'Invalid password or login'
     return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You were logged out')
+    return redirect(url_for('display_connection'))
 
 @app.route('/home')
 def display_wall():
@@ -73,20 +81,77 @@ def display_wall():
         })
     return render_template('home.html', postits=postits)
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 def display_config():
     """Allow the user to manage his profile"""
-    return redirect(url_for('display_wall'))
+    pass
 
-@app.route('/new', methods=['POST'])
+@app.route('/new', methods=['GET','POST'])
 def add_post_it():
     """Allow the user to add a new post-it on the wall."""
-    return redirect(url_for('display_wall'))
+    error = None
+    cur = g.db.execute('select owner from color')
+    owners = ([row[0] for row in cur.fetchall()])
+    form_error = {}
+    if request.method == 'POST':
+        valid_owner = True
+        valid_text = True
+        valid_date = True
+        if request.form['owner'] in owners:
+            valid_owner = True
+        else:
+            form_error['owner'] = 'This Bullshit must have been said by someone'
+            valid_owner = False
+        if not request.form['text']:
+            valid_text = False
+            form_error['text'] = 'There must be a bullshit message'
+        else:
+            valid_text = True
+        if not request.form['date']:
+            valid_date = False
+            form_error['date'] = 'This stupid thing must have been said one day'
+        else:
+            valid_date = True
+        if valid_owner and valid_text and valid_date:
+            g.db.execute('insert into postit (owner, text, date) values (?, ?, ?)',
+                        [request.form['owner'], request.form['text'], request.form['date']])
+            g.db.commit()
+            flash('A new post-it was successefully added')
+            return redirect(url_for('display_wall'))
+            print('SUCCESS')
+        else:
+            error = ' invalid data'
+    return render_template('new_post_it.html', owners=owners, error=error, form_error=form_error)
 
 @app.route('/statistics')
 def display_stats():
     """Display some statistics from the application"""
-    return redirect(url_for('display_wall'))
+    cur_post_count = g.db.execute('select count(post_id) from postit')
+    cur_post_owner = g.db.execute('select owner, count(post_id) from postit group by owner')
+
+    stat_post_owner = []
+    for row in cur_post_count.fetchall():
+        stat_post_count = row[0]
+    for row in cur_post_owner.fetchall():
+        stupidity = ""
+        if row[1] <= 3:
+            stupidity += "That was a slip of the tongue"
+        else:
+            if row[1] <= 5:
+                stupidity += "This guy must have a problem!"
+            else:
+                if row[1] <= 8:
+                    stupidity += "This guy is so stupid!"
+                else:
+                    stupidity += "OMG! he said so much bullshit! I'm done!"
+        stat_post_owner.append({
+            'owner': row[0],
+            'count': row[1],
+            'stupidity': stupidity
+        })
+
+    return render_template('statistics.html', count_visits=app.config['COUNT'],
+                stat_post_it=stat_post_count, stat_post_owner=stat_post_owner)
 
 if __name__ == '__main__':
     app.run()

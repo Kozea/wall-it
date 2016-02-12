@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Statistics</h2>
+<ul>
+    <li>
+        How much this application has been visited? {{ count_visits }}
+    </li>
+    <li>
+        How many post-it do we have? {{ stat_post_it }}
+    </li>
+    {% for stat_owner in stat_post_owner %}
+    <li>
+        {{ stat_owner.owner }} said {{ stat_owner.count }} stupid things!
+        {{ stat_owner.stupidity }}
+    </li>
+    {% else %}
+    <li>
+        Sadly, their are no post-it :'(
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

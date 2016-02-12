@@ -1,5 +1,26 @@
-<!doctype html>
-<title>Wall-it</title>
-<div>
-    {% block body %}{% endblock %}
-</div>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Wall-it</title>
+    </head>
+    <main>
+        <header>
+            {% if session.user_id %}
+                <nav>
+                    <a href="{{ url_for('display_wall') }}">Home</a>
+                    <a href="{{ url_for('display_stats') }}">Statistics</a>
+                    <a href="#">Profile</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            {% endif %}
+        </header>
+        {% block body %}
+        {% endblock %}
+        <footer>
+            {% if session.user_id %}
+                <a href="{{ url_for('add_post_it') }}">Add post-it</a>
+            {% endif %}
+        </footer>
+    </main>
+</html>

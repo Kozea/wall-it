@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Add new post-it</h2>
+    {% if error %}<p><strong>Error:</strong> {{ error }}</p>{% endif %}
+    <form action="{{ url_for('add_post_it') }}" method="post">
+        <ul>
+            <li><h3>Date:</h3>
+                <p><input type=date name=date>{% if form_error.date %}<strong>{{ form_error.date }}</strong>{% endif %}</p>
+            </li>
+            <li><h3>Text:</h3>
+                <p><textarea name=text rows=5 cols=40>{% if form_error.text %}{{ form_error.text }}{% endif %}</textarea></p>
+            </li>
+            <li>
+                <p><h3>Owner:</h3>
+                    <select name="owner" size="1">
+                        <option selected>Owner?...
+                        {% for owner in owners %}
+                        <option>{{owner}}
+                        {% else %}
+                        <option>No owner
+                        {% endfor %}
+                    </select>
+                    {% if form_error.owner %}<strong>{{ form_error.owner }}</strong>{% endif %}
+            </li>
+        </ul>
+        <input type=submit value=Add>
+    </form>
+{% endblock %}
