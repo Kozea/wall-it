@@ -2,9 +2,10 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
         <title>Wall-it</title>
     </head>
-    <main>
+    <body>
         <header>
             {% if session.user_id %}
                 <nav>
@@ -14,13 +15,16 @@
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </nav>
             {% endif %}
+            <center><h2 >{{ title }}</h2></center>
         </header>
-        {% block body %}
-        {% endblock %}
+        <main>
+            {% block main %}
+            {% endblock %}
+        </main>
         <footer>
             {% if session.user_id %}
                 <a href="{{ url_for('add_post_it') }}">Add post-it</a>
             {% endif %}
         </footer>
-    </main>
+    </body>
 </html>

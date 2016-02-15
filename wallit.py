@@ -1,22 +1,33 @@
 # all the import
 import sqlite3
+import httplib2
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 from contextlib import closing
+from functools import wraps
+from apiclient.discovery import build
+from oauth2client.client import OAuth2WebServerFlow
 
 # configuration
 DATABASE = '/tmp/wallit.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-COUNT = 0
+OAUTH_CLIENT_ID = '197145980271-j21e4i5v6dt3mia217npvkik6t0irj05.apps.googleusercontent.com'
+OAUTH_SECRET_KEY = 'U9T-UgjX2ngH6ipB9zh9MWHW'
+OAUTH_REDIRECT = 'http://wall-it.kozea.fr/oauth2callback'
 
 # TODO: change this when we get Google's data
-USERS = {'thibaut': 'pass', 'toto':'toto'}
+#USERS = {'thibaut': 'pass', 'toto':'toto'}
 
 #application
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('WALLIT_SETTINGS', silent=True)
+
+FLOW = OAuth2WebServerFlow(client_id=app.config['OAUTH_CLIENT_ID'],
+                           client_secret=app.config['OAUTH_SECRET_KEY'],
+                           scope='profile',
+                           redirect_uri=app.config['OAUTH_REDIRECT'])
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -39,9 +50,36 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
-@app.route('/', methods=['GET', 'POST'])
+def auth(function):
+    """Wrapper checking if the user is logged in."""
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if session.get('user'):
+            return function(*args, **kwargs)
+        else:
+            authorize_url = FLOW.step1_get_authorize_url()
+            return redirect(authorize_url)
+    return wrapper
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    code = request.args.get('code')
+    if code:
+        credentials = FLOW.step2_exchange(code)
+        http = credentials.authorize(httplib2.Http())
+        service = build('admin', 'directory_v1', http=http)
+        users = service.users().list(domain='kozea.fr').execute()
+        for user in users:
+            print(user)
+    else:
+        print(request.form.get('error'))
+        #return redirect(url_for('display_connection'))
+
+"""@app.route('/', methods=['GET', 'POST'])
+@auth
 def display_connection():
-    """Allow the user to connect himself on the application"""
+    'Allow the user to connect himself on the application'
+    title = "Login"
     error = None
     is_logged = False
     if request.method == 'POST':
@@ -49,24 +87,26 @@ def display_connection():
         the_user_pass = request.form['password']
         is_logged = (the_user_name, the_user_pass) in app.config['USERS'].items()
         if is_logged:
-            app.config['COUNT'] += 1
             session['user_id'] = the_user_name
             flash('You were logged in')
             return redirect(url_for('display_wall'))
         else:
             error = 'Invalid password or login'
-    return render_template('login.html', error=error)
+    return render_template('login.html', error=error, title=title)"""
 
-@app.route('/logout')
+"""@app.route('/logout')
+@auth
 def logout():
     session.pop('user_id', None)
     flash('You were logged out')
-    return redirect(url_for('display_connection'))
+    return redirect(url_for('display_connection'))"""
 
-@app.route('/home')
+@app.route('/')
+@auth
 def display_wall():
     """Display all post-its on a wall"""
-    s = """ select p.owner, text, date, code_color
+    title = "Home"
+    s = """ select post_id, p.owner, text, date, code_color
                 from postit p, color c
                 where p.owner = c.owner
                 order by post_id desc """
@@ -77,18 +117,22 @@ def display_wall():
             "owner": row[0],
             "text": row[1],
             "date": row[2],
-            "color": row[3]
+            "color": row[3],
+            "post_id": row[4]
         })
-    return render_template('home.html', postits=postits)
+    return render_template('home.html', postits=postits, title=title)
 
 @app.route('/profile', methods=['GET', 'POST'])
+@auth
 def display_config():
     """Allow the user to manage his profile"""
     pass
 
 @app.route('/new', methods=['GET','POST'])
+@auth
 def add_post_it():
     """Allow the user to add a new post-it on the wall."""
+    title = "Add post-it"
     error = None
     cur = g.db.execute('select owner from color')
     owners = ([row[0] for row in cur.fetchall()])
@@ -114,21 +158,25 @@ def add_post_it():
             valid_date = True
         if valid_owner and valid_text and valid_date:
             g.db.execute('insert into postit (owner, text, date) values (?, ?, ?)',
-                        [request.form['owner'], request.form['text'], request.form['date']])
+                [request.form['owner'], request.form['text'],
+                request.form['date']])
             g.db.commit()
             flash('A new post-it was successefully added')
             return redirect(url_for('display_wall'))
             print('SUCCESS')
         else:
             error = ' invalid data'
-    return render_template('new_post_it.html', owners=owners, error=error, form_error=form_error)
+    return render_template('new_post_it.html', owners=owners, error=error,
+                form_error=form_error, title=title)
 
 @app.route('/statistics')
+@auth
 def display_stats():
     """Display some statistics from the application"""
+    title = "Statistics"
     cur_post_count = g.db.execute('select count(post_id) from postit')
-    cur_post_owner = g.db.execute('select owner, count(post_id) from postit group by owner')
-
+    cur_post_owner = g.db.execute("""select owner, count(post_id)
+    from postit group by owner""")
     stat_post_owner = []
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
@@ -136,22 +184,19 @@ def display_stats():
         stupidity = ""
         if row[1] <= 3:
             stupidity += "That was a slip of the tongue"
+        elif row[1] <= 5:
+            stupidity += "This guy must have a problem!"
+        elif row[1] <= 8:
+            stupidity += "This guy is so stupid!"
         else:
-            if row[1] <= 5:
-                stupidity += "This guy must have a problem!"
-            else:
-                if row[1] <= 8:
-                    stupidity += "This guy is so stupid!"
-                else:
-                    stupidity += "OMG! he said so much bullshit! I'm done!"
+            stupidity += "OMG! he said so much bullshit! I'm done!"
         stat_post_owner.append({
             'owner': row[0],
             'count': row[1],
             'stupidity': stupidity
         })
-
-    return render_template('statistics.html', count_visits=app.config['COUNT'],
-                stat_post_it=stat_post_count, stat_post_owner=stat_post_owner)
+    return render_template('statistics.html', stat_post_it=stat_post_count,
+                stat_post_owner=stat_post_owner, title=title)
 
 if __name__ == '__main__':
     app.run()

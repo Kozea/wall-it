@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
-    <h2>Login</h2>
+{% block main %}
     {% if error %}<p><strong>Error:</strong> {{ error }}</p>{% endif %}
     <form action="{{ url_for('display_connection') }}" method="post">
         <dl>

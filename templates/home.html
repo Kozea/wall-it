@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
-{% block body %}
-<h2>Home</h2>
-<dl>
+{% block main %}
     {% for postit in postits%}
-        <dt>De {{ postit.owner }} le {{ postit.date }}</dt>
-        <dd><q>{{ postit.text|safe }}</q></dd>
-        <dd><h4>Color : {{ postit.color }}</h4></dd>
+    <article>
+        <p>De {{ postit.owner }} le {{ postit.date }}</p>
+        <p><q>{{ postit.text|safe }}</q></p>
+        <h4>Color : {{ postit.color }}</h4>
+    </article>
     {% else %}
-        No post-it(s) so far!
+        <p>No post-it(s) so far!</p>
     {% endfor %}
-</dl>
 {% endblock %}

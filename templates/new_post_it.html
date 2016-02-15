@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
-    <h2>Add new post-it</h2>
+{% block main %}
     {% if error %}<p><strong>Error:</strong> {{ error }}</p>{% endif %}
     <form action="{{ url_for('add_post_it') }}" method="post">
         <ul>
