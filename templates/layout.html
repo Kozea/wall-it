@@ -2,29 +2,29 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
         <title>Wall-it</title>
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     </head>
     <body>
         <header>
-            {% if session.user_id %}
+            {% if session.users %}
                 <nav>
                     <a href="{{ url_for('display_wall') }}">Home</a>
                     <a href="{{ url_for('display_stats') }}">Statistics</a>
                     <a href="#">Profile</a>
-                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <a href="{{ url_for('add_post_it') }}">Add post-it</a>
                 </nav>
             {% endif %}
-            <center><h2 >{{ title }}</h2></center>
+            <h2 >{{ title }}</h2>
         </header>
-        <main>
+        <main  id="droppable" class="limitation">
             {% block main %}
             {% endblock %}
         </main>
         <footer>
-            {% if session.user_id %}
-                <a href="{{ url_for('add_post_it') }}">Add post-it</a>
-            {% endif %}
         </footer>
     </body>
 </html>

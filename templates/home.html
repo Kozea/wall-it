@@ -1,12 +1,29 @@
 {% extends "layout.html" %}
 {% block main %}
-    {% for postit in postits%}
-    <article>
+<script type="text/javascript">
+    $(function() {
+        $('.objet').draggable({
+            revert: "invalid",
+            cursor: "move",
+            containment : '.limitation',
+            grid : [10 , 10]
+        });
+        $( "#droppable" ).droppable({
+            drop: function(event, ui){
+                var posX = parseInt( ui.offset.left );
+                var posY = parseInt( ui.offset.top );
+                var id = $( "article" ).data( "postitId" );
+                $.post( "/save_position", { x: posX, y: posY, post_id: id })
+            }
+        });
+    });
+</script>
+    {% for postit in postits %}
+    <article data-postit-id="{{ postit.post_id }}" class="objet" style=" background-color:{{ postit.color }}; ">
         <p>De {{ postit.owner }} le {{ postit.date }}</p>
-        <p><q>{{ postit.text|safe }}</q></p>
-        <h4>Color : {{ postit.color }}</h4>
+        <q>{{ postit.text|safe }}</q>
     </article>
     {% else %}
-        <p>No post-it(s) so far!</p>
+        <article>No post-it(s) so far!</article>
     {% endfor %}
 {% endblock %}

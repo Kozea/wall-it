@@ -1,12 +1,30 @@
 main{
-    padding: 10px;
-    border: 1px solid #aaaaaa;
-    height: auto;
+    padding: 5px;
+    border: 1px solid #000000;
+    height: 1000px;
 }
 
-article{
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+h2{
+    text-align: center;
+}
+
+article {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+    width: 200px;
+    border: 1px solid #000000;
+}
+
+p {
+    margin: 5px;
     padding: 5px;
-    border: 1px solid #aaaaaa;
-    height: 150px;
-    width: 300px;
+    padding: 5px;
 }

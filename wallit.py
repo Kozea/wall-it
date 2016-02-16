@@ -1,11 +1,11 @@
 # all the import
 import sqlite3
 import httplib2
+import xml.etree.ElementTree as ET
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 from contextlib import closing
 from functools import wraps
-from apiclient.discovery import build
 from oauth2client.client import OAuth2WebServerFlow
 
 # configuration
@@ -14,7 +14,7 @@ DEBUG = True
 SECRET_KEY = 'development key'
 OAUTH_CLIENT_ID = '197145980271-j21e4i5v6dt3mia217npvkik6t0irj05.apps.googleusercontent.com'
 OAUTH_SECRET_KEY = 'U9T-UgjX2ngH6ipB9zh9MWHW'
-OAUTH_REDIRECT = 'http://wall-it.kozea.fr/oauth2callback'
+OAUTH_REDIRECT = 'http://localhost:5000/oauth2callback'
 
 # TODO: change this when we get Google's data
 #USERS = {'thibaut': 'pass', 'toto':'toto'}
@@ -26,7 +26,7 @@ app.config.from_envvar('WALLIT_SETTINGS', silent=True)
 
 FLOW = OAuth2WebServerFlow(client_id=app.config['OAUTH_CLIENT_ID'],
                            client_secret=app.config['OAUTH_SECRET_KEY'],
-                           scope='profile',
+                           scope='https://www.google.com/m8/feeds',
                            redirect_uri=app.config['OAUTH_REDIRECT'])
 
 def connect_db():
@@ -54,29 +54,31 @@ def auth(function):
     """Wrapper checking if the user is logged in."""
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if session.get('user'):
+        if session.get('users'):
             return function(*args, **kwargs)
         else:
             authorize_url = FLOW.step1_get_authorize_url()
-            return redirect(authorize_url)
+        return redirect(authorize_url)
     return wrapper
 
 @app.route('/oauth2callback')
 def oauth2callback():
     code = request.args.get('code')
+    print('JE PASSE PAR LA')
     if code:
         credentials = FLOW.step2_exchange(code)
         http = credentials.authorize(httplib2.Http())
-        service = build('admin', 'directory_v1', http=http)
-        users = service.users().list(domain='kozea.fr').execute()
-        for user in users:
-            print(user)
+        _, content = http.request('https://www.google.com/m8/feeds/contacts/default/full?v=3.0')
+        data = ET.fromstring(content)
+        session['users'] = [title.text for title in data.findall('./feed/entry')]
+        #régler le problème session['users']
+        session['users'] = ['Guillaume Ayoub']
+        print(session['users'], data, content)
+        return redirect(url_for('display_wall'))
     else:
-        print(request.form.get('error'))
-        #return redirect(url_for('display_connection'))
-
-"""@app.route('/', methods=['GET', 'POST'])
-@auth
+        return request.form.get('error')
+"""
+@app.route('/', methods=['GET', 'POST'])
 def display_connection():
     'Allow the user to connect himself on the application'
     title = "Login"
@@ -92,19 +94,19 @@ def display_connection():
             return redirect(url_for('display_wall'))
         else:
             error = 'Invalid password or login'
-    return render_template('login.html', error=error, title=title)"""
+    return render_template('login.html', error=error, title=title)
 
-"""@app.route('/logout')
-@auth
+@app.route('/logout')
 def logout():
     session.pop('user_id', None)
     flash('You were logged out')
     return redirect(url_for('display_connection'))"""
 
-@app.route('/')
+@app.route('/') 
 @auth
 def display_wall():
     """Display all post-its on a wall"""
+    print(session['users'])
     title = "Home"
     s = """ select post_id, p.owner, text, date, code_color
                 from postit p, color c
@@ -114,13 +116,23 @@ def display_wall():
     postits = []
     for row in cur.fetchall():
         postits.append({
-            "owner": row[0],
-            "text": row[1],
-            "date": row[2],
-            "color": row[3],
-            "post_id": row[4]
+            "post_id": row[0],
+            "owner": row[1],
+            "text": row[2],
+            "date": row[3],
+            "color": row[4]
         })
     return render_template('home.html', postits=postits, title=title)
+
+@app.route('/save_position', methods=['POST'])
+@auth
+def save_position():
+    error = None
+    pos_x = request.form.get('x')
+    pos_y = request.form.get('y')
+    postit_id = request.form.get('post_id')
+    print(pos_x, pos_y, postit_id)
+    return 'truc'
 
 @app.route('/profile', methods=['GET', 'POST'])
 @auth
