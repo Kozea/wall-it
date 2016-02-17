@@ -1,6 +1,8 @@
 import sqlite3
 import httplib2
 import datetime
+import pygal
+from pygal.style import CleanStyle
 import xml.etree.ElementTree as ET
 from flask import (
     Flask, request, session, g, redirect, url_for, render_template, flash)
@@ -105,6 +107,7 @@ def display_wall():
         })
     return render_template('home.html', postits=postits, title='Home')
 
+
 @app.route('/save_position', methods=['POST'])
 @auth
 def save_position():
@@ -115,11 +118,16 @@ def save_position():
     g.db.commit()
     return redirect(url_for('display_wall'))
 
+
 @app.route('/profile', methods=['GET', 'POST'])
 @auth
 def display_config():
-    """Allow the user to manage his profile"""
-    pass
+    """Allow the user to manage his profile."""
+    if request.method == 'POST':
+        new_color = request.form['color']
+        print('COLOR --> ', new_color)
+    return render_template('profile.html', title="Profile")
+
 
 @app.route('/new', methods=['GET', 'POST'])
 @auth
@@ -134,33 +142,30 @@ def add_post_it():
         return redirect(url_for('display_wall'))
     return render_template('new_post_it.html', title="Add post-it")
 
+
 @app.route('/statistics')
 @auth
 def display_stats():
     """Display some statistics from the application"""
     cur_post_count = g.db.execute('select count(post_id) from postit')
-    cur_post_owner = g.db.execute("""select owner, count(post_id)
-    from postit group by owner""")
-    stat_post_owner = []
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
+    return render_template('statistics.html', stat_post_it=stat_post_count
+                ,title="Statistics")
+
+
+@app.route('/charts/post_it_by_user_pie.svg')
+@auth
+def post_it_by_user_pie():
+    """Display a graph for the statistics page."""
+    post_it_by_user_pie = pygal.Pie(style=CleanStyle)
+    post_it_by_user_pie.title = 'Nombre de post-it par personne'
+    cur_post_owner = g.db.execute("""select owner, count(post_id)
+    from postit group by owner""")
     for row in cur_post_owner.fetchall():
-        stupidity = ""
-        if row[1] <= 3:
-            stupidity += "That was a slip of the tongue"
-        elif row[1] <= 5:
-            stupidity += "This guy must have a problem!"
-        elif row[1] <= 8:
-            stupidity += "This guy is so stupid!"
-        else:
-            stupidity += "OMG! he said so much bullshit! I'm done!"
-        stat_post_owner.append({
-            'owner': row[0],
-            'count': row[1],
-            'stupidity': stupidity
-        })
-    return render_template('statistics.html', stat_post_it=stat_post_count,
-                stat_post_owner=stat_post_owner, title="Statistics")
+        post_it_by_user_pie.add(row[0], row[1])
+    return post_it_by_user_pie.render_response()
+
 
 if __name__ == '__main__':
     app.run()

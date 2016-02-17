@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block main %}
     <form action="{{ url_for('add_post_it') }}" method="post">
-        <label>Date<input type=date name=date required></label>
-        <label>Texte<textarea name=text rows=5 cols=40 required></textarea></label>
+        <label>Date<input type="date" name="date" required></label>
+        <label>Texte<textarea name="text" rows=5 cols=40 required></textarea></label>
         <label>Qui a dit ça ?
-            <select name=owner size="1" required>
+            <select name="owner" size="1" required>
                 {% for user in session.users %}
                     <option>{{user}}
                 {% else %}
@@ -12,6 +12,6 @@
                 {% endfor %}
             </select>
         </label>
-        <input type=submit value=Add>
+        <input type="submit" value=Add>
     </form>
 {% endblock %}

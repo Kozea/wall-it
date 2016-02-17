@@ -1,18 +1,9 @@
 {% extends "layout.html" %}
 {% block main %}
-<ul>
-    <li>
-        How many post-it do we have? {{ stat_post_it }}
-    </li>
-    {% for stat_owner in stat_post_owner %}
-    <li>
-        {{ stat_owner.owner }} said {{ stat_owner.count }} stupid things!
-        {{ stat_owner.stupidity }}
-    </li>
-    {% else %}
-    <li>
-        Sadly, their are no post-it :'(
-    </li>
-    {% endfor %}
-</ul>
+    <section>
+        Il y a combien de post-it(s)? {{ stat_post_it }}
+    </section>
+    <figure>
+        <embed type="image/svg+xml" src="{{url_for('post_it_by_user_pie')}}" width="600" height="600" />
+    </figure>
 {% endblock %}
