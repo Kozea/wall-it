@@ -1,31 +1,17 @@
 {% extends "layout.html" %}
 {% block main %}
-    {% if error %}<p><strong>Error:</strong> {{ error }}</p>{% endif %}
     <form action="{{ url_for('add_post_it') }}" method="post">
-        <ul>
-            <li><h3>Date:</h3>
-                <p><input type=date name=date {% if not form_error.date %} value={{defaults.date}} {% endif %}>{% if form_error.date %}<strong>{{ form_error.date }}</strong>{% endif %}</p>
-            </li>
-            <li><h3>Text:</h3>
-                <p><textarea name=text rows=5 cols=40>{% if not form_error.text %}{{defaults.text }}{% endif %}</textarea>{% if form_error.text %}{{ form_error.text }}{% endif %}</p>
-            </li>
-            <li>
-                <p><h3>Owner:</h3>
-                    <select name="owner" size="1">
-                        {% if not form_error.owner %}
-                        <option selected>{{ defaults.owner }}
-                        {% else %}
-                        <option selected>Owner?...
-                        {% endif %}
-                        {% for owner in owners %}
-                        <option>{{owner}}
-                        {% else %}
-                        <option>No owner
-                        {% endfor %}
-                    </select>
-                    {% if form_error.owner %}<strong>{{ form_error.owner }}</strong>{% endif %}
-            </li>
-        </ul>
+        <label>Date<input type=date name=date required></label>
+        <label>Texte<textarea name=text rows=5 cols=40 required></textarea></label>
+        <label>Qui a dit ça ?
+            <select name=owner size="1" required>
+                {% for user in session.users %}
+                    <option>{{user}}
+                {% else %}
+                    <option>No owner
+                {% endfor %}
+            </select>
+        </label>
         <input type=submit value=Add>
     </form>
 {% endblock %}

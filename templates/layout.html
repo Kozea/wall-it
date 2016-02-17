@@ -7,22 +7,22 @@
         <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        {% block script %}{% endblock %}
     </head>
     <body>
         <header>
-            {% if session.users %}
-                <nav>
-                    <a href="{{ url_for('display_wall') }}">Home</a>
-                    <a href="{{ url_for('display_stats') }}">Statistics</a>
-                    <a href="#">Profile</a>
-                    <a href="{{ url_for('add_post_it') }}">Add post-it</a>
-                </nav>
-            {% endif %}
-            <h2 >{{ title }}</h2>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('display_wall') }}">Home</a>
+                    <li><a href="{{ url_for('display_stats') }}">Statistics</a>
+                    <li><a href="#">Profile</a>
+                    <li><a href="{{ url_for('add_post_it') }}">Add post-it</a>
+                </ul>
+            </nav>
+            <h1>{{ title }}</h1>
         </header>
-        <main  id="droppable" class="limitation">
-            {% block main %}
-            {% endblock %}
+        <main>
+            {% block main %}{% endblock %}
         </main>
         <footer>
         </footer>

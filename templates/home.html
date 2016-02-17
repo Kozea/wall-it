@@ -1,29 +1,32 @@
 {% extends "layout.html" %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(function() {
+            $('article').draggable({
+                cursor: "move",
+                containment : 'main',
+                grid : [10 , 10]
+            });
+            $('main').droppable({
+                drop: function(event, ui){
+                    var posX = parseInt( ui.offset.left );
+                    var posY = parseInt( ui.offset.top );
+                    var id = ui.helper.data( "postitId" );
+                    $.post( "/save_position", { x: posX, y: posY, post_id: id })
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block main %}
-<script type="text/javascript">
-    $(function() {
-        $('.objet').draggable({
-            revert: "invalid",
-            cursor: "move",
-            containment : '.limitation',
-            grid : [10 , 10]
-        });
-        $( "#droppable" ).droppable({
-            drop: function(event, ui){
-                var posX = parseInt( ui.offset.left );
-                var posY = parseInt( ui.offset.top );
-                var id = ui.helper.data( "postitId" );
-                $.post( "/save_position", { x: posX, y: posY, post_id: id })
-            }
-        });
-    });
-</script>
     {% for postit in postits %}
-    <article data-postit-id="{{ postit.post_id }}" class="objet" style=" background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
-        <p>De {{ postit.owner }} le {{ postit.date }}</p>
-        <q>{{ postit.text|safe }}</q>
-    </article>
+        <article data-postit-id="{{ postit.post_id }}" style=" background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
+            <h2>De {{ postit.owner }} le {{ postit.date }}</h2>
+            <blockquote>{{ postit.text|safe }}</blockquote>
+        </article>
     {% else %}
-        <article>No post-it(s) so far!</article>
+        <article>Pas de post-it(s)!</article>
     {% endfor %}
 {% endblock %}
