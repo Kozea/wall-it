@@ -4,15 +4,19 @@
     <form action="{{ url_for('add_post_it') }}" method="post">
         <ul>
             <li><h3>Date:</h3>
-                <p><input type=date name=date>{% if form_error.date %}<strong>{{ form_error.date }}</strong>{% endif %}</p>
+                <p><input type=date name=date {% if not form_error.date %} value={{defaults.date}} {% endif %}>{% if form_error.date %}<strong>{{ form_error.date }}</strong>{% endif %}</p>
             </li>
             <li><h3>Text:</h3>
-                <p><textarea name=text rows=5 cols=40>{% if form_error.text %}{{ form_error.text }}{% endif %}</textarea></p>
+                <p><textarea name=text rows=5 cols=40>{% if not form_error.text %}{{defaults.text }}{% endif %}</textarea>{% if form_error.text %}{{ form_error.text }}{% endif %}</p>
             </li>
             <li>
                 <p><h3>Owner:</h3>
                     <select name="owner" size="1">
+                        {% if not form_error.owner %}
+                        <option selected>{{ defaults.owner }}
+                        {% else %}
                         <option selected>Owner?...
+                        {% endif %}
                         {% for owner in owners %}
                         <option>{{owner}}
                         {% else %}

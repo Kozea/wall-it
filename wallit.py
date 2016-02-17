@@ -166,18 +166,22 @@ def add_post_it():
         if request.form['owner'] in owners:
             valid_owner = True
         else:
-            form_error['owner'] = 'This Bullshit must have been said by someone'
+            form_error['owner'] = 'No owner?'
             default_values['text'] = request.form['text']
+            default_values['date'] = request.form['date']
             valid_owner = False
         if not request.form['text']:
             valid_text = False
-            form_error['text'] = 'There must be a bullshit message'
+            default_values['owner'] = request.form['owner']
+            default_values['date'] = request.form['date']
+            form_error['text'] = 'No message?'
         else:
             valid_text = True
         if not request.form['date']:
             valid_date = False
+            default_values['owner'] = request.form['owner']
             default_values['text'] = request.form['text']
-            form_error['date'] = 'This stupid thing must have been said one day'
+            form_error['date'] = 'No date?'
         else:
             valid_date = True
         if valid_owner and valid_text and valid_date:
@@ -191,7 +195,7 @@ def add_post_it():
         else:
             error = ' invalid data'
     return render_template('new_post_it.html', owners=owners, error=error,
-                form_error=form_error, title=title)
+                form_error=form_error, title=title, defaults=default_values)
 
 @app.route('/statistics')
 @auth
