@@ -64,7 +64,6 @@ def auth(function):
 @app.route('/oauth2callback')
 def oauth2callback():
     code = request.args.get('code')
-    print('JE PASSE PAR LA')
     if code:
         credentials = FLOW.step2_exchange(code)
         http = credentials.authorize(httplib2.Http())
@@ -102,13 +101,13 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('display_connection'))"""
 
-@app.route('/') 
+@app.route('/')
 @auth
 def display_wall():
     """Display all post-its on a wall"""
     print(session['users'])
     title = "Home"
-    s = """ select post_id, p.owner, text, date, code_color
+    s = """ select post_id, p.owner, text, date, code_color, x, y
                 from postit p, color c
                 where p.owner = c.owner
                 order by post_id desc """
@@ -120,19 +119,29 @@ def display_wall():
             "owner": row[1],
             "text": row[2],
             "date": row[3],
-            "color": row[4]
+            "color": row[4],
+            "x": row[5],
+            "y": row[6]
         })
+    for postit in postits:
+        print("DISPLAY_WALL --> ID = ",postit['post_id']," X = ",postit['x'], " Y = ", postit['y'])
     return render_template('home.html', postits=postits, title=title)
 
 @app.route('/save_position', methods=['POST'])
 @auth
 def save_position():
-    error = None
+    """route that get the post request from the page / when we drop
+    a post-it"""
     pos_x = request.form.get('x')
     pos_y = request.form.get('y')
     postit_id = request.form.get('post_id')
-    print(pos_x, pos_y, postit_id)
-    return 'truc'
+    #print("SAVE_POSITION --> ID = ",postit_id," X = ", pos_x, " Y = ", pos_y)
+    s = """update postit
+    set x="""+pos_x+""", y="""+pos_y+"""
+    where post_id="""+postit_id
+    g.db.execute(s)
+    g.db.commit()
+    return redirect(url_for('display_wall'))
 
 @app.route('/profile', methods=['GET', 'POST'])
 @auth
@@ -149,6 +158,7 @@ def add_post_it():
     cur = g.db.execute('select owner from color')
     owners = ([row[0] for row in cur.fetchall()])
     form_error = {}
+    default_values = {}
     if request.method == 'POST':
         valid_owner = True
         valid_text = True
@@ -157,6 +167,7 @@ def add_post_it():
             valid_owner = True
         else:
             form_error['owner'] = 'This Bullshit must have been said by someone'
+            default_values['text'] = request.form['text']
             valid_owner = False
         if not request.form['text']:
             valid_text = False
@@ -165,6 +176,7 @@ def add_post_it():
             valid_text = True
         if not request.form['date']:
             valid_date = False
+            default_values['text'] = request.form['text']
             form_error['date'] = 'This stupid thing must have been said one day'
         else:
             valid_date = True

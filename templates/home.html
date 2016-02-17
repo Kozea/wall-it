@@ -12,14 +12,14 @@
             drop: function(event, ui){
                 var posX = parseInt( ui.offset.left );
                 var posY = parseInt( ui.offset.top );
-                var id = $( "article" ).data( "postitId" );
+                var id = ui.helper.data( "postitId" );
                 $.post( "/save_position", { x: posX, y: posY, post_id: id })
             }
         });
     });
 </script>
     {% for postit in postits %}
-    <article data-postit-id="{{ postit.post_id }}" class="objet" style=" background-color:{{ postit.color }}; ">
+    <article data-postit-id="{{ postit.post_id }}" class="objet" style=" background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
         <p>De {{ postit.owner }} le {{ postit.date }}</p>
         <q>{{ postit.text|safe }}</q>
     </article>
