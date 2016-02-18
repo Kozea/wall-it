@@ -1,6 +1,7 @@
 import sqlite3
 import httplib2
 import datetime
+import json
 import pygal
 from pygal.style import CleanStyle
 import xml.etree.ElementTree as ET
@@ -17,6 +18,7 @@ SECRET_KEY = 'development key'
 OAUTH_CLIENT_ID = '197145980271-j21e4i5v6dt3mia217npvkik6t0irj05.apps.googleusercontent.com'
 OAUTH_SECRET_KEY = 'U9T-UgjX2ngH6ipB9zh9MWHW'
 OAUTH_REDIRECT = 'http://localhost:5000/oauth2callback'
+OAUTH_SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
 
 
 app = Flask(__name__)
@@ -27,8 +29,9 @@ app.config.from_envvar('WALLIT_SETTINGS', silent=True)
 FLOW = OAuth2WebServerFlow(
     client_id=app.config['OAUTH_CLIENT_ID'],
     client_secret=app.config['OAUTH_SECRET_KEY'],
-    scope='https://www.google.com/m8/feeds',
-    redirect_uri=app.config['OAUTH_REDIRECT'])
+    redirect_uri=app.config['OAUTH_REDIRECT'],
+    scope=app.config['OAUTH_SCOPE'],
+    user_agent='wallit/1.0')
 
 
 def connect_db():
@@ -60,9 +63,12 @@ def auth(function):
     """Wrapper checking if the user is logged in."""
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if session.get('users'):
+        if session.get('person'):
+            print('OUI SESSION[PERSON]')
+            print('ME --> ', session['person'])
             return function(*args, **kwargs)
         else:
+            print("SESSION[PERSON] IL N'Y A PAS")
             authorize_url = FLOW.step1_get_authorize_url()
         return redirect(authorize_url)
     return wrapper
@@ -72,19 +78,29 @@ def auth(function):
 def oauth2callback():
     code = request.args.get('code')
     if code:
-        # TODO: Fix session['users']
         # credentials = FLOW.step2_exchange(code)
         # http = credentials.authorize(httplib2.Http())
-        # _, content = http.request('https://www.google.com/m8/feeds/contacts/default/full?v=3.0')
-        # data = ET.fromstring(content)
-        # session['users'] = [title.text for title in data.findall('./feed/entry')]
-        session['users'] = ['Thibaut Moiroud', 'Guillaume Ayoub', 'Clément Plasse']
+        # _, content = http.request(
+        #     "https://www.googleapis.com/plus/v1/people/me")
+        # data = json.loads(content.decode('utf-8'))
+        # print('MY DATA --> ', data)
+        # if 'name' in data:
+        #     print('NAME IN DATA OK')
+        #     session['person'] = '%s %s' % (
+        #         data['name']['givenName'], data['name']['familyName'])
+        session['person'] = ['Thibaut Moiroud']
+        session['users'] = ['Thibaut Moiroud', 'Clément Plasse', 'Guillaume Ayoub']
         return redirect(url_for('display_wall'))
     else:
-        return request.form.get('error')
+        print('ERREUR --> ', request.form.get('error'))
+        return redirect(url_for('index'))
+
+@app.route('/', methods=('GET', 'POST'))
+def index():
+    return redirect(url_for('display_wall'))
 
 
-@app.route('/')
+@app.route('/home')
 @auth
 def display_wall():
     """Display all post-its on a wall."""
@@ -105,7 +121,7 @@ def display_wall():
             "x": row[5],
             "y": row[6]
         })
-    return render_template('home.html', postits=postits, title='Home')
+    return render_template('home.html', postits=postits, title='Accueil')
 
 
 @app.route('/save_position', methods=['POST'])
@@ -123,10 +139,29 @@ def save_position():
 @auth
 def display_config():
     """Allow the user to manage his profile."""
+    color = ""
+    my_postits = []
     if request.method == 'POST':
-        new_color = request.form['color']
-        print('COLOR --> ', new_color)
-    return render_template('profile.html', title="Profile")
+        g.db.execute(
+            "update color set code_color=? where owner=?",
+            [request.form['color'], session['person'][0]])
+    cur_color = g.db.execute(
+        "select code_color from color where owner=?",
+        [session['person'][0]])
+    for row in cur_color.fetchall():
+        color += row[0]
+    cur_post = g.db.execute(
+        "select post_id, date, text from postit where owner=? order by date asc",
+        [session['person'][0]])
+    for row in cur_post.fetchall():
+        my_postits.append({
+            'id':row[0],
+            'date':row[1],
+            'text':row[2]
+        })
+    g.db.commit()
+    return render_template('profile.html', title="Profile", color=color,
+        postits=my_postits)
 
 
 @app.route('/new', methods=['GET', 'POST'])
@@ -140,7 +175,7 @@ def add_post_it():
         g.db.commit()
         flash('A new post-it was successefully added')
         return redirect(url_for('display_wall'))
-    return render_template('new_post_it.html', title="Add post-it")
+    return render_template('new_post_it.html', title="Ajout de post-it")
 
 
 @app.route('/statistics')
@@ -148,10 +183,11 @@ def add_post_it():
 def display_stats():
     """Display some statistics from the application"""
     cur_post_count = g.db.execute('select count(post_id) from postit')
+    cur_post_date = g.db.execute('')
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
     return render_template('statistics.html', stat_post_it=stat_post_count
-                ,title="Statistics")
+                ,title="Statistiques")
 
 
 @app.route('/charts/post_it_by_user_pie.svg')
@@ -166,6 +202,10 @@ def post_it_by_user_pie():
         post_it_by_user_pie.add(row[0], row[1])
     return post_it_by_user_pie.render_response()
 
+@app.route('/modify_post_it', methods=['GET', 'POST'])
+@auth
+def modify():
+    pass
 
 if __name__ == '__main__':
     app.run()

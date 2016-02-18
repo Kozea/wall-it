@@ -1,0 +1,11 @@
+error {
+    'message': 'Insufficient Permission',
+    'errors': [
+        {
+            'reason': 'insufficientPermissions',
+            'message': 'Insufficient Permission',
+            'domain': 'global'
+        }
+    ],
+    'code': 403
+}
