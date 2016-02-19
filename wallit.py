@@ -4,7 +4,6 @@ import datetime
 import json
 import pygal
 from pygal.style import CleanStyle
-import xml.etree.ElementTree as ET
 from flask import (
     Flask, request, session, g, redirect, url_for, render_template, flash)
 from contextlib import closing
@@ -18,7 +17,9 @@ SECRET_KEY = 'development key'
 OAUTH_CLIENT_ID = '197145980271-j21e4i5v6dt3mia217npvkik6t0irj05.apps.googleusercontent.com'
 OAUTH_SECRET_KEY = 'U9T-UgjX2ngH6ipB9zh9MWHW'
 OAUTH_REDIRECT = 'http://localhost:5000/oauth2callback'
-OAUTH_SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
+OAUTH_SCOPE = (
+    'https://www.googleapis.com/auth/contacts.readonly',
+    'https://www.googleapis.com/auth/plus.login')
 
 
 app = Flask(__name__)
@@ -64,13 +65,8 @@ def auth(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         if session.get('person'):
-            print('OUI SESSION[PERSON]')
-            print('ME --> ', session['person'])
             return function(*args, **kwargs)
-        else:
-            print("SESSION[PERSON] IL N'Y A PAS")
-            authorize_url = FLOW.step1_get_authorize_url()
-        return redirect(authorize_url)
+        return redirect(FLOW.step1_get_authorize_url())
     return wrapper
 
 
@@ -81,22 +77,24 @@ def oauth2callback():
         credentials = FLOW.step2_exchange(code)
         http = credentials.authorize(httplib2.Http())
         _, content = http.request(
-            "https://www.googleapis.com/plus/v1/people/me")
+            "https://people.googleapis.com/v1/people/me")
         data = json.loads(content.decode('utf-8'))
-        print('MY DATA --> ', data)
-        # if 'name' in data:
-        #     session['person'] = '%s %s' % (
-        #         data['name']['givenName'], data['name']['familyName'])
+        if 'names' in data:
+            session['person'] = data['names'][0]['displayName']
         _, users_content = http.request(
-            "https://www.googleapis.com/plus/v1/people/me/connections")
-        # users_data = json.loads(users_content.decode('utf-8'))
-        print('USERS DATA--> ', users_content)
-        # session['users'] = []
-        # if 'name' in users_data['connections']:
-        #     session['users'].append('%s %s' % (
-        #         users_data['name']['givenName'], users_data['name']['familyName']))
-        # session['person'] = ['Thibaut Moiroud']
-        # session['users'] = ['Thibaut Moiroud', 'Clément Plasse', 'Guillaume Ayoub']
+            "https://people.googleapis.com/v1/people/me/connections"
+            "?requestMask.includeField=person.names%2Cperson.emailAddresses"
+            "&pageSize=500")
+        users_data = json.loads(users_content.decode('utf-8'))
+        session['users'] = []
+        for connection in users_data['connections']:
+            if 'names' in connection and 'emailAddresses' in connection:
+                for address in connection['emailAddresses']:
+                    if address['value'].endswith('@kozea.fr'):
+                        session['users'].append('%s %s' % (
+                            connection['names'][0].get('givenName', ''),
+                            connection['names'][0].get('familyName', '')))
+                        break
         return redirect(url_for('display_wall'))
     else:
         print('ERREUR --> ', request.form.get('error'))
