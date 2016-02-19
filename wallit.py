@@ -78,18 +78,25 @@ def auth(function):
 def oauth2callback():
     code = request.args.get('code')
     if code:
-        # credentials = FLOW.step2_exchange(code)
-        # http = credentials.authorize(httplib2.Http())
-        # _, content = http.request(
-        #     "https://www.googleapis.com/plus/v1/people/me")
-        # data = json.loads(content.decode('utf-8'))
-        # print('MY DATA --> ', data)
+        credentials = FLOW.step2_exchange(code)
+        http = credentials.authorize(httplib2.Http())
+        _, content = http.request(
+            "https://www.googleapis.com/plus/v1/people/me")
+        data = json.loads(content.decode('utf-8'))
+        print('MY DATA --> ', data)
         # if 'name' in data:
-        #     print('NAME IN DATA OK')
         #     session['person'] = '%s %s' % (
         #         data['name']['givenName'], data['name']['familyName'])
-        session['person'] = ['Thibaut Moiroud']
-        session['users'] = ['Thibaut Moiroud', 'Clément Plasse', 'Guillaume Ayoub']
+        _, users_content = http.request(
+            "https://www.googleapis.com/plus/v1/people/me/connections")
+        # users_data = json.loads(users_content.decode('utf-8'))
+        print('USERS DATA--> ', users_content)
+        # session['users'] = []
+        # if 'name' in users_data['connections']:
+        #     session['users'].append('%s %s' % (
+        #         users_data['name']['givenName'], users_data['name']['familyName']))
+        # session['person'] = ['Thibaut Moiroud']
+        # session['users'] = ['Thibaut Moiroud', 'Clément Plasse', 'Guillaume Ayoub']
         return redirect(url_for('display_wall'))
     else:
         print('ERREUR --> ', request.form.get('error'))
