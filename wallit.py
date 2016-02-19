@@ -183,7 +183,6 @@ def add_post_it():
 def display_stats():
     """Display some statistics from the application"""
     cur_post_count = g.db.execute('select count(post_id) from postit')
-    cur_post_date = g.db.execute('')
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
     return render_template('statistics.html', stat_post_it=stat_post_count
@@ -205,7 +204,25 @@ def post_it_by_user_pie():
 @app.route('/modify_post_it', methods=['GET', 'POST'])
 @auth
 def modify():
-    pass
+    cur = g.db.execute(
+        'select post_id, text, date from postit order by post_id desc')
+    postits = []
+    for row in cur.fetchall():
+        postits.append({
+            'post_id': row[0],
+            'text': row[1],
+            'date': row[2]
+        })
+    if request.method == 'POST':
+        g.db.execute(
+            "update postit set date=?, text=?, owner=? where post_id=?",
+            [request.form.get(key) for key in ('date', 'text', 'owner',
+            'post_id')])
+        g.db.commit()
+        return redirect(url_for('display_wall'))
+    return render_template('modify_post_it.html', title="Modifier un post-it",
+        postits=postits)
+
 
 if __name__ == '__main__':
     app.run()

@@ -16,12 +16,6 @@
                     $.post( '/save_position', { x: x, y: y, post_id: id });
                 }
             });
-            $('article').dblclick(function(){
-                var id = $('article').data( 'postitId' );
-                str = "ID --> " + id;
-                alert(str);
-                //$.post( '/modify_post_it', { id:id });
-            });
         });
     </script>
 {% endblock %}
