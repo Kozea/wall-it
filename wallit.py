@@ -81,16 +81,15 @@ def oauth2callback():
         credentials = FLOW.step2_exchange(code)
         http = credentials.authorize(httplib2.Http())
         _, content = http.request(
-            "https://www.googleapis.com/plus/v1/people/me")
+            "https://people.googleapis.com/v1/people/me")
         data = json.loads(content.decode('utf-8'))
         print('MY DATA --> ', data)
         # if 'name' in data:
         #     session['person'] = '%s %s' % (
         #         data['name']['givenName'], data['name']['familyName'])
         _, users_content = http.request(
-            "https://www.googleapis.com/plus/v1/people/me/connections")
+            "https://people.googleapis.com/v1/people/me/connections")
         # users_data = json.loads(users_content.decode('utf-8'))
-        print('USERS DATA--> ', users_content)
         # session['users'] = []
         # if 'name' in users_data['connections']:
         #     session['users'].append('%s %s' % (
@@ -192,6 +191,7 @@ def display_stats():
     cur_post_count = g.db.execute('select count(post_id) from postit')
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
+    cur_date_post = g.db.execute('select owner, text, date from postit')
     return render_template('statistics.html', stat_post_it=stat_post_count
                 ,title="Statistiques")
 
