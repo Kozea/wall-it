@@ -181,9 +181,7 @@ def display_config():
 def add_post_it():
     """Allow the user to add a new post-it on the wall."""
     if request.method == 'POST':
-        cur = g.db.execute('select owner from color')
-        owners = [row[0] for row in cur.fetchall()]
-        if request.form['owner'] in owners:
+        if request.form['owner'] in session['users']:
             g.db.execute(
                 'insert into postit (owner, text, date) values (?, ?, ?)',
                 [request.form['owner'], request.form['text'],
@@ -191,8 +189,6 @@ def add_post_it():
             g.db.commit()
             flash('A new post-it was successefully added')
             return redirect(url_for('display_wall'))
-        else:
-            return redirect(url_for('new_user'))
     return render_template('new_post_it.html', title="Ajout de post-it")
 
 
@@ -240,17 +236,6 @@ def modify():
         return redirect(url_for('display_wall'))
     return render_template('modify_post_it.html', title="Modifier un post-it",
         postits=postits)
-
-
-@app.route('/new_user', methods=['GET', 'POST'])
-@auth
-def new_user():
-    if request.method == 'POST':
-        if request.form['owner'] in session['users']:
-            g.db.execute('insert into color (code_color, owner) values (?, ?)',
-                [request.form.get(key) for key in ('color', 'owner')])
-            return redirect(url_for('add_post_it'))
-    return render_template('new_user.html', title="Nouvel utilisateur")
 
 
 if __name__ == '__main__':
