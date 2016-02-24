@@ -43,8 +43,6 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
-        with app.open_resource('content.sql', mode='r') as e:
-            db.cursor().executescript(e.read())
         db.commit()
 
 
@@ -104,7 +102,7 @@ def oauth2callback():
 def logout():
     session.pop('person', None)
     flash('You were logged out')
-    return redirect(url_for('display_wall'))
+    return redirect(url_for('index'))
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -156,15 +154,16 @@ def display_config():
     if request.method == 'POST':
         g.db.execute(
             "update color set code_color=? where owner=?",
-            [request.form['color'], session['person'][0]])
+            [request.form['color'], session['person']])
     cur_color = g.db.execute(
         "select code_color from color where owner=?",
-        [session['person'][0]])
+        [session['person']])
+    print(session['person'])
     for row in cur_color.fetchall():
         color += row[0]
     cur_post = g.db.execute(
         "select post_id, date, text from postit where owner=? order by date asc",
-        [session['person'][0]])
+        [session['person']])
     for row in cur_post.fetchall():
         my_postits.append({
             'id':row[0],
@@ -186,6 +185,10 @@ def add_post_it():
                 'insert into postit (owner, text, date) values (?, ?, ?)',
                 [request.form['owner'], request.form['text'],
                 request.form['date']])
+            g.db.execute(
+                'insert into color (code_color, owner) values (?, ?)',
+                ['#FFFFFF', request.form['owner']]
+                )
             g.db.commit()
             flash('A new post-it was successefully added')
             return redirect(url_for('display_wall'))
