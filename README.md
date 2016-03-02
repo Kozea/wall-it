@@ -1,17 +1,30 @@
 # wall-it
 
-## Dependencies :
+## Dépendances :
 
-### Flask :
+Flask :
+
+```
 pip install flask
+```
 
-### Google connection :
+Connexion à Google :
+
+```
 pip install httplib2
 pip install oauth2client
+```
 
-### Pygal :
+Pygal :
+
+```
 pip install pygal
+```
 
-## Database init :
+Initialisation de la Bdd :
 
+```
 sqlite3 /tmp/wallit.db < schema.sql
+```
+
+ATTENTION : Si vous voulez ajouter des post-its, vérifiez bien que la personne liée au post-it est dans vos contacts google.
