@@ -13,7 +13,6 @@ Connexion à Google :
 ```
  $ pip install httplib2
  $ pip install oauth2client
- $ pip install keyring
 ```
 
 Pygal :
