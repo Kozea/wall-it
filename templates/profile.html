@@ -7,11 +7,10 @@
         <label>Une autre couleur?<input type="color" name="color" value="{{color}}"></label>
         <input type="submit" value="Modifier">
     </form>
-    <h2>Tes post-its (par date croissante):</h2>
+    <h2>Tes post-its :</h2>
     {% for postit in postits %}
         <section>
             <h3>Post-it N°{{ postit.id }}</h3>
-            <p>Datant du {{ postit.date }}</p>
             <blockquote>{{ postit.text|safe }}</blockquote>
         </section>
     {% else %}

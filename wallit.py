@@ -1,14 +1,14 @@
 import sqlite3
 import httplib2
-import datetime
 import json
 import pygal
 from pygal.style import CleanStyle
 from flask import (
-    Flask, request, session, g, redirect, url_for, render_template, flash)
+    abort, Flask, request, session, g, redirect, url_for, render_template, flash)
 from contextlib import closing
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.file import Storage
 
 
 DATABASE = '/tmp/wallit.db'
@@ -73,6 +73,8 @@ def oauth2callback():
     code = request.args.get('code')
     if code:
         credentials = FLOW.step2_exchange(code)
+        storage = Storage('credentials')
+        storage.put(credentials)
         http = credentials.authorize(httplib2.Http())
         _, content = http.request(
             "https://people.googleapis.com/v1/people/me")
@@ -95,41 +97,51 @@ def oauth2callback():
                         break
         return redirect(url_for('display_wall'))
     else:
-        print('ERREUR --> ', request.form.get('error'))
         return redirect(url_for('index'))
 
-@app.route('/logout')
+
+@app.route('/logout', methods=('GET', 'POST'))
+@auth
 def logout():
     session.pop('person', None)
-    flash('You were logged out')
-    return redirect(url_for('index'))
+    storage = Storage('credentials')
+    credential = storage.get()
+    if credential is not None:
+        cr_json = credential.to_json()
+        credential = credential.new_from_json(cr_json)
+        credential.revoke(httplib2.Http())
+        return "<h1>Tu t'es déconnecté</h2>"
+    else:
+        return redirect(url_for('index'))
 
 
 @app.route('/', methods=('GET', 'POST'))
+@auth
 def index():
-    return redirect(url_for('display_wall'))
+    if session['person']:
+        return redirect(url_for('display_wall'))
+    else:
+        abort(403)
 
 
 @app.route('/home')
 @auth
 def display_wall():
     """Display all post-its on a wall."""
-    s = """ select post_id, p.owner, text, date, code_color, x, y
+    s = """ select post_id, p.owner, text, code_color, x, y
                 from postit p, color c
                 where p.owner = c.owner
                 order by post_id desc """
     cur = g.db.execute(s)
     postits = []
     for row in cur.fetchall():
-        date = datetime.datetime.strptime(row[3], '%Y-%m-%d').strftime('%d/%m/%Y')
         postits.append({
             "post_id": row[0],
             "owner": row[1],
             "text": row[2],
-            "date": date,
-            "color": row[4],
-            "x": row[5],
-            "y": row[6]
+            "color": row[3],
+            "x": row[4],
+            "y": row[5]
         })
     return render_template('home.html', postits=postits, title='Accueil')
 
@@ -151,24 +163,34 @@ def display_config():
     """Allow the user to manage his profile."""
     color = ""
     my_postits = []
+    cur_owners_with_color = g.db.execute("select owner from color")
+    owners_with_color = []
+    for owner in cur_owners_with_color.fetchall():
+        owners_with_color.append(owner[0])
     if request.method == 'POST':
-        g.db.execute(
-            "update color set code_color=? where owner=?",
-            [request.form['color'], session['person']])
+        if session['person'] in owners_with_color:
+            g.db.execute(
+                "update color set code_color=? where owner=?",
+                [request.form['color'], session['person']])
+            g.db.commit()
+        else:
+            g.db.execute(
+                "insert into color (code_color, owner) values (?, ?)",
+                [request.form['color'], session['person']])
+            g.db.commit()
     cur_color = g.db.execute(
         "select code_color from color where owner=?",
         [session['person']])
-    print(session['person'])
     for row in cur_color.fetchall():
         color += row[0]
+    print(color)
     cur_post = g.db.execute(
-        "select post_id, date, text from postit where owner=? order by date asc",
+        "select post_id, text from postit where owner=? order by post_id desc",
         [session['person']])
     for row in cur_post.fetchall():
         my_postits.append({
             'id':row[0],
-            'date':row[1],
-            'text':row[2]
+            'text':row[1]
         })
     g.db.commit()
     return render_template('profile.html', title="Profile", color=color,
@@ -180,18 +202,22 @@ def display_config():
 def add_post_it():
     """Allow the user to add a new post-it on the wall."""
     if request.method == 'POST':
+        cur_owners_with_color = g.db.execute("select owner from color")
+        owners_with_color = []
+        for owner in cur_owners_with_color.fetchall():
+            owners_with_color.append(owner[0])
         if request.form['owner'] in session['users']:
             g.db.execute(
-                'insert into postit (owner, text, date) values (?, ?, ?)',
-                [request.form['owner'], request.form['text'],
-                request.form['date']])
-            g.db.execute(
-                'insert into color (code_color, owner) values (?, ?)',
-                ['#FFFFFF', request.form['owner']]
-                )
+                'insert into postit (owner, text) values (?, ?)',
+                [request.form['owner'], request.form['text']])
             g.db.commit()
+            if request.form['owner'] not in owners_with_color:
+                g.db.execute(
+                    'insert into color (code_color, owner) values (?, ?)',
+                    ['#FFFFFF', request.form['owner']])
+                g.db.commit()
             flash('A new post-it was successefully added')
-            return redirect(url_for('display_wall'))
+        return redirect(url_for('display_wall'))
     return render_template('new_post_it.html', title="Ajout de post-it")
 
 
@@ -218,23 +244,22 @@ def post_it_by_user_pie():
         post_it_by_user_pie.add(row[0], row[1])
     return post_it_by_user_pie.render_response()
 
+
 @app.route('/modify_post_it', methods=['GET', 'POST'])
 @auth
 def modify():
     cur = g.db.execute(
-        'select post_id, text, date from postit order by post_id desc')
+        'select post_id, text from postit order by post_id desc')
     postits = []
     for row in cur.fetchall():
         postits.append({
             'post_id': row[0],
             'text': row[1],
-            'date': row[2]
         })
     if request.method == 'POST':
         g.db.execute(
-            "update postit set date=?, text=?, owner=? where post_id=?",
-            [request.form.get(key) for key in ('date', 'text', 'owner',
-            'post_id')])
+            "update postit set text=?, owner=? where post_id=?",
+            [request.form.get(key) for key in ('text', 'owner', 'post_id')])
         g.db.commit()
         return redirect(url_for('display_wall'))
     return render_template('modify_post_it.html', title="Modifier un post-it",

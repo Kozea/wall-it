@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block main %}
     <form action="{{ url_for('add_post_it') }}" method="post">
-        <label>Date<input type="date" name="date" required value="{{date}}"></label>
         <label>Texte<textarea name="text" rows=5 cols=40 required>{{text}}</textarea></label>
         <label>Qui a dit ça ?
             <select name="owner" required>

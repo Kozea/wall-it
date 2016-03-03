@@ -23,8 +23,8 @@
 {% block main %}
     {% for postit in postits %}
         <article data-postit-id="{{ postit.post_id }}" style=" background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
-            <h2>De {{ postit.owner }} le {{ postit.date }}</h2>
             <blockquote>{{ postit.text|safe }}</blockquote>
+            <p>De {{ postit.owner }}</p>
         </article>
     {% else %}
         <article>Pas de post-it(s)!</article>
