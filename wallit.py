@@ -11,20 +11,8 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 
 
-DATABASE = '/tmp/wallit.db'
-DEBUG = True
-SECRET_KEY = 'development key'
-OAUTH_CLIENT_ID = '197145980271-j21e4i5v6dt3mia217npvkik6t0irj05.apps.googleusercontent.com'
-OAUTH_SECRET_KEY = 'U9T-UgjX2ngH6ipB9zh9MWHW'
-OAUTH_REDIRECT = 'http://localhost:5000/oauth2callback'
-OAUTH_SCOPE = (
-    'https://www.googleapis.com/auth/contacts.readonly',
-    'https://www.googleapis.com/auth/plus.login')
-
-
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.config.from_envvar('WALLIT_SETTINGS', silent=True)
+app.config.from_envvar('WALLIT_SETTINGS')
 
 
 FLOW = OAuth2WebServerFlow(
