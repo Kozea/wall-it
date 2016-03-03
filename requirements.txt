@@ -1,0 +1,4 @@
+flask
+pygal
+oauth2client
+httplib2

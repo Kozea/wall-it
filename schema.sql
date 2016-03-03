@@ -14,8 +14,3 @@ create table color(
     code_color text,
     owner text primary key
 );
-
-create table credentials(
-    user text primary key not null,
-    credentials_content text not null
-);
