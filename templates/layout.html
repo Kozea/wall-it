@@ -32,6 +32,7 @@
     </head>
     <body>
         <header>
+            <h1><a href="{{ url_for('display_wall') }}">Wall-it</a></h1>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('display_wall') }}">Accueil</a>
@@ -42,7 +43,6 @@
                     <li><a href="{{ url_for('logout') }}">Déconnexion</a></li>
                 </ul>
             </nav>
-            <h1>{{ title }}</h1>
         </header>
         <main>
             {% block main %}{% endblock %}
