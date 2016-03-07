@@ -171,7 +171,6 @@ def display_config():
         [session['person']])
     for row in cur_color.fetchall():
         color += row[0]
-    print(color)
     cur_post = g.db.execute(
         "select post_id, text from postit where owner=? order by post_id desc",
         [session['person']])
