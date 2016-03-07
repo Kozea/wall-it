@@ -1,10 +1,107 @@
+@import url(https://fonts.googleapis.com/css?family=Karla:400,700,400italic,700italic);
+@font-face {
+  font-family: 'georges';
+  src: url('Georges.ttf');
+}
+
+/* Reset */
+ul,blockquote, p {
+  padding: 0;
+  margin: 0;
+}
+
+ul li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+h1 {
+  display: none;
+}
+
+html {
+  font-family: 'Karla';
+  background: url(images/point-bkgd.png);
+}
+
 main{
-    border: 2px solid #000000;
-    height: 1000px;
+  height: 1000px;
+}
+
+nav {
+  position: fixed;
+  left: inherit;
+  right: 20px;
+  z-index: 1;
+}
+
+nav ul li {
+  display: inline-block;
+  position: relative;
+  padding: 0 6px;
+}
+
+nav ul li a {
+  border-bottom: 1px solid red;
+  position: relative;
+  display: inline-block;
+  margin: 0 8px;
+  padding-bottom: 10px;
+  font-size: 15px;
+}
+
+nav ul li a:before {
+  content: '';
+  width: 100%;
+  height: 3px;
+  display: block;
+  opacity: 0;
+  transform: scale(0);
+  transition: ease-in-out .25s;
+  position: relative;
+  top: 30px;
+}
+
+nav ul li:hover a:before {
+  background-color: blue;
+  opacity: 1;
+  transform: scale(1);
 }
 
 article {
-    position: absolute;
-    width: 200px;
-    border: 1px solid #000000;
+  position: absolute;
+  width: 200px;
+  padding: 15px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+  border-radius: 0 0 15px 0;
+}
+
+article:before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background: rgba(0,0,0, 0.2);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 0 0 15px 0;
+}
+
+article blockquote, article p {
+  font-family: 'georges';
+}
+
+article blockquote {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 27px;
+}
+
+article p {
+  text-align: right;
+  font-size: 22px;
+  margin-bottom: 10px;
 }
