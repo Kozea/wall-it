@@ -19,6 +19,10 @@ ul li {
   list-style: none;
 }
 
+h3 {
+  margin: 0;
+}
+
 a {
   text-decoration: none;
   cursor: pointer;
@@ -110,6 +114,39 @@ article p {
   margin-bottom: 10px;
 }
 
+section.content {
+  max-width: 70%;
+  background: #fff;
+  margin: 60px auto;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+}
+
+section.content.profile {
+  text-align: left;
+}
+
+section.profile form label {
+  display: initial;
+}
+
+.my-post-it {
+  background: #FBFBFB;
+  width: 31.5%;
+  box-sizing: border-box;
+  display: inline-block;
+  margin-bottom: 20px;
+  margin-right: 2%;
+  padding: 15px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+  vertical-align: top
+}
+
+.my-post-it:nth-child(3n+2) {
+  margin-right: 0;
+}
+
 /* === FORM ===*/
 form {
   padding: 10px;
@@ -151,4 +188,12 @@ input[type="submit"] {
   border: none;
   background: #56D8C3;
   cursor: pointer;
+}
+
+input[type="color"] {
+  border: none;
+  background: none;
+  height: 35px;
+  vertical-align: middle;
+  width: 35px;
 }

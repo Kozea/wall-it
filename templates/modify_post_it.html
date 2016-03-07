@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block main %}
-    <section>
+    <section class="content">
         {% for postit in postits%}
                 <h2>N°{{postit.post_id}}: {{postit.text|truncate(50, True)}}</h2>
                 <form action="{{ url_for('modify') }}" method="post">
@@ -24,7 +24,7 @@
                             {% endfor %}
                         </select>
                     </label>
-                    <input type="submit" value="Modifier?">
+                    <input type="submit" value="Modifier">
                 </form>
         {% endfor %}
     </section>

@@ -1,19 +1,18 @@
 {% extends "layout.html" %}
 {% block main %}
-    <figure style="background-color: {{color}}; width: 70px; height: 50px;">
-        Ta couleur
-    </figure>
-    <form action="{{ url_for('display_config') }}" method="post">
-        <label>Une autre couleur?<input type="color" name="color" value="{{color}}"></label>
-        <input type="submit" value="Modifier">
-    </form>
-    <h2>Tes post-its :</h2>
-    {% for postit in postits %}
-        <section>
-            <h3>Post-it N°{{ postit.id }}</h3>
-            <blockquote>{{ postit.text|safe }}</blockquote>
-        </section>
-    {% else %}
-        <section>Pas de post-it(s)!</section>
+    <section class="content profile">
+        <form action="{{ url_for('display_config') }}" method="post">
+            <label>Choisir une autre couleur <input type="color" name="color" value="{{color}}"></label>
+            <input type="submit" value="Modifier">
+        </form>
+        <h2>Tes post-its :</h2>
+        {% for postit in postits %}
+            <section class="my-post-it">
+                <h3>Post-it N°{{ postit.id }}</h3>
+                <blockquote>{{ postit.text|safe }}</blockquote>
+            </section>
+        {% else %}
+            <section>Pas de post-it(s)!</section>
+    </section>
     {% endfor %}
 {% endblock %}
