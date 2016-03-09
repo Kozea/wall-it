@@ -1,31 +1,18 @@
-{% extends "layout.html" %}
-
-{% block script %}
-    <script>
-        $(function() {
-            $( "section" ).accordion();
-        });
-      </script>
-{% endblock %}
-
-{% block main %}
-    <section class="content">
-        {% for postit in postits%}
-                <h2>N°{{postit.post_id}}: {{postit.text|truncate(50, True)}}</h2>
-                <form action="{{ url_for('modify') }}" method="post">
-                    <input type="hidden" name="post_id" value="{{postit.post_id}}">
-                    <label>Texte<textarea name="text" rows=5 cols=40 required>{{postit.text}}</textarea></label>
-                    <label>Qui a dit ça ?
-                        <select name="owner" required>
-                            {% for user in session.users %}
-                                <option value="{{user}}">{{user}}
-                            {% else %}
-                                <option value="">No owner
-                            {% endfor %}
-                        </select>
-                    </label>
-                    <input type="submit" value="Modifier">
-                </form>
-        {% endfor %}
-    </section>
-{% endblock %}
+<div class="popup">
+    <h1>Modification</h1>
+    <form action="{{ url_for('modify', post_id=post_id) }}" method="post">
+        <input type="hidden" name="post_id" value="{{post_id}}">
+        <label>Texte<textarea name="text" rows=5 cols=40 required>{{text}}</textarea></label>
+        <label>Qui a dit ça ?
+            <select name="owner" required>
+                    <option value="{{owner}}">{{owner}}
+                {% for user in session.users|sort %}
+                    <option value="{{user}}">{{user}}
+                {% else %}
+                    <option value="">No owner
+                {% endfor %}
+            </select>
+        </label>
+        <input type="submit" value="Modifier">
+    </form>
+</div>

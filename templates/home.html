@@ -2,19 +2,49 @@
 
 {% block script %}
     <script type="text/javascript">
+        zoom = 1
         $(function() {
+            current = this;
             $('article').draggable({
                 cursor: 'move',
-                containment : 'main',
-                grid : [10 , 10]
-            });
-            $('main').droppable({
-                drop: function(event, ui){
-                    var x = parseInt( ui.offset.left );
-                    var y = parseInt( ui.offset.top );
-                    var id = ui.helper.data( 'postitId' );
-                    $.post( '/save_position', { x: x, y: y, post_id: id });
+                // containment: 'html',
+                // grid: [10 , 10],
+                scroll: true,
+                scrollSensitivity: (200 / (zoom / 10)),
+                scrollSpeed: (200 / (zoom / 10)),
+                drag: function(event, ui){
+                    ui.position.top = Math.round(ui.position.top / zoom);
+                    ui.position.left = Math.round(ui.position.left / zoom);
                 }
+            });
+            var dropFunction = function() {
+                $('html').droppable({
+                    drop: function(event, ui){
+                        var x = parseInt(ui.offset.left);
+                        var y = parseInt(ui.offset.top);
+                        console.log(x, ' // ', y);
+                        var id = ui.helper.data( 'postitId' );
+                        $.post( '/save_position', { x: x, y: y, post_id: id });
+                    }
+                });
+            };
+            dropFunction();
+            $(window).bind('mousewheel', function(event) {
+                if (event.originalEvent.wheelDelta >= 0) {
+                    if (zoom < 1) {
+                        zoom = zoom * 1.5;
+                    }
+                }
+                else {
+                    if (zoom > 0.3) {
+                        zoom = zoom / 1.5;
+                    }
+                }
+                $('article').css('zoom', zoom);
+                if (current.timeout) {
+                    clearTimeout(current.timeout);
+                }
+                current.timeout = setTimeout(dropFunction, 1000);
             });
         });
     </script>
@@ -22,9 +52,10 @@
 
 {% block main %}
     {% for postit in postits %}
-        <article data-postit-id="{{ postit.post_id }}" style=" background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
+        <article data-postit-id="{{ postit.post_id }}" style="background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
             <blockquote>{{ postit.text|safe }}</blockquote>
             <p>De {{ postit.owner }}</p>
+            <a class="popup-link" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
         </article>
     {% else %}
         <article>Pas de post-it(s)!</article>

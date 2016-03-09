@@ -8,7 +8,6 @@ from flask import (
 from contextlib import closing
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
 
 
 app = Flask(__name__)
@@ -61,8 +60,6 @@ def oauth2callback():
     code = request.args.get('code')
     if code:
         credentials = FLOW.step2_exchange(code)
-        storage = Storage('credentials')
-        storage.put(credentials)
         http = credentials.authorize(httplib2.Http())
         _, content = http.request(
             "https://people.googleapis.com/v1/people/me")
@@ -84,21 +81,6 @@ def oauth2callback():
                             connection['names'][0].get('familyName', '')))
                         break
         return redirect(url_for('display_wall'))
-    else:
-        return redirect(url_for('index'))
-
-
-@app.route('/logout', methods=('GET', 'POST'))
-@auth
-def logout():
-    session.pop('person', None)
-    storage = Storage('credentials')
-    credential = storage.get()
-    if credential is not None:
-        cr_json = credential.to_json()
-        credential = credential.new_from_json(cr_json)
-        credential.revoke(httplib2.Http())
-        return "<h1>Tu t'es déconnecté</h2>"
     else:
         return redirect(url_for('index'))
 
@@ -225,32 +207,38 @@ def post_it_by_user_pie():
     """Display a graph for the statistics page."""
     post_it_by_user_pie = pygal.Pie(style=CleanStyle)
     post_it_by_user_pie.title = 'Nombre de post-it par personne'
-    cur_post_owner = g.db.execute("""select owner, count(post_id)
-    from postit group by owner""")
+    cur_post_owner = g.db.execute(
+        "select owner, count(post_id) from postit group by owner")
     for row in cur_post_owner.fetchall():
         post_it_by_user_pie.add(row[0], row[1])
     return post_it_by_user_pie.render_response()
 
 
-@app.route('/modify_post_it', methods=['GET', 'POST'])
+@app.route('/modify_post_it/<int:post_id>', methods=['GET', 'POST'])
 @auth
-def modify():
-    cur = g.db.execute(
-        'select post_id, text from postit order by post_id desc')
-    postits = []
-    for row in cur.fetchall():
-        postits.append({
-            'post_id': row[0],
-            'text': row[1],
-        })
+def modify(post_id):
+    cur_postit = g.db.execute(
+        "select text, owner from postit where post_id=?", [post_id])
+    for row in cur_postit.fetchall():
+        text = row[0]
+        owner = row[1]
     if request.method == 'POST':
+        cur_owners_with_color = g.db.execute("select owner from color")
+        owners_with_color = []
+        for owner in cur_owners_with_color.fetchall():
+            owners_with_color.append(owner[0])
         g.db.execute(
-            "update postit set text=?, owner=? where post_id=?",
-            [request.form.get(key) for key in ('text', 'owner', 'post_id')])
+        "update postit set text=?, owner=? where post_id=?",
+            [request.form.get('text'), request.form.get('owner'), post_id])
         g.db.commit()
+        if request.form.get('owner') not in owners_with_color:
+            g.db.execute(
+                'insert into color (code_color, owner) values (?, ?)',
+                ['#FFFFFF', request.form['owner']])
+            g.db.commit()
         return redirect(url_for('display_wall'))
     return render_template('modify_post_it.html', title="Modifier un post-it",
-        postits=postits)
+        post_id=post_id, owner=owner, text=text)
 
 
 if __name__ == '__main__':

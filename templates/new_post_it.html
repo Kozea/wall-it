@@ -4,7 +4,7 @@
         <label>Texte<textarea name="text" rows=5 cols=40 required>{{text}}</textarea></label>
         <label>De
             <select name="owner" required>
-                {% for user in session.users %}
+                {% for user in session.users|sort %}
                     <option value="{{user}}">{{user}}
                 {% else %}
                     <option value="">No owner
