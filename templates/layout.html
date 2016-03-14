@@ -8,35 +8,13 @@
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
         {% block script %}{% endblock %}
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('.popup-link').on('click', function(e) {
-                    $link = $(this);
-                    e.preventDefault();
-                    $('header, main, footer').css({'pointer-events': 'none', 'opacity': '0.4'});
-                    $('html').css('background-color', '#B3B3B3');
-                    $.get($link.attr('href'), function(popup) {
-                        if ($('.popup').size() === 0) {
-                            $('main').after(popup);
-                            $('.popup').prepend("<a>X</a>");
-                            $('.popup a').on('click', function(){
-                                $('.popup').remove();
-                                $('header, main, footer').css({'pointer-events': 'auto', 'opacity': '1'});
-                                $('html').css('background-color', 'transparent');
-                            });
-                        }
-                    });
-
-                });
-            });
-        </script>
+        <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
     </head>
     <body>
         <header>
             <h1><a href="{{ url_for('display_wall') }}">Wall-it</a></h1>
             <nav>
                 <ul>
-                    <li><a href="{{ url_for('display_wall') }}">Accueil</a>
                     <li><a href="{{ url_for('display_stats') }}">Statistiques</a>
                     <li><a href="{{ url_for('display_config') }}">Profil</a>
                     <li><a class="popup-link" href="{{ url_for('add_post_it') }}">Ajouter post-it</a>
