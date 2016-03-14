@@ -37,6 +37,10 @@ body {
   margin: 0;
 }
 
+main{
+  height: 1000px;
+}
+
 header > h1 {
   background: #fff;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
@@ -97,13 +101,13 @@ article p {
   text-align: right;
 }
 
-article a.edit-post {
+article a#edit-post {
   bottom: 15px;
   font-size: 0;
   position: absolute;
 }
 
-article:hover a.edit-post:before {
+article:hover a#edit-post:before {
   content: url(images/edit.png);
 }
 

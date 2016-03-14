@@ -9,7 +9,7 @@
         <article data-postit-id="{{ postit.post_id }}" style="background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
             <blockquote>{{ postit.text|safe }}</blockquote>
             <p>-{{ postit.owner }}</p>
-            <a class="edit-post" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
+            <a class="popup-link" id="edit-post" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
         </article>
     {% else %}
         <article>Pas de post-it(s)!</article>
