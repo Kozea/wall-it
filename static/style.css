@@ -24,35 +24,31 @@ h3 {
 }
 
 a {
-  text-decoration: none;
   cursor: pointer;
+  text-decoration: none;
 }
 
 html {
-  font-family: 'Karla';
   background: url(images/point-bkgd.png);
+  font-family: 'Karla';
 }
 
 body {
   margin: 0;
 }
 
-main{
-  height: 1000px;
-}
-
 header > h1 {
-  position: fixed;
-  padding: 5px 20px 10px;
-  margin: 0 20px;
   background: #fff;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+  margin: 0 20px;
+  padding: 5px 20px 10px;
+  position: fixed;
   z-index: 1;
 }
 
 header > h1 a {
-  font-family: 'PermanentMarker';
   color: #222;
+  font-family: 'PermanentMarker';
   font-size: 22px;
 }
 
@@ -61,66 +57,63 @@ header > h1 a:hover {
 }
 
 nav {
-  z-index: 1;
   text-align: right;
+  z-index: 1;
 }
 
 nav ul li {
   display: inline-block;
-  position: relative;
   padding: 15px 5px;
+  position: relative;
 }
 
 nav ul li a {
-  position: relative;
-  display: inline-block;
-  margin: 0 8px;
-  font-size: 15px;
   color: #222;
+  display: inline-block;
+  font-size: 15px;
+  margin: 0 8px;
+  position: relative;
 }
 
 article {
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+  padding: 15px;
   position: absolute;
   width: 200px;
-  padding: 15px;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
-  /*border-radius: 0 0 15px 0;*/
 }
-
-/*article:before {
-  content: '';
-  width: 18px;
-  height: 18px;
-  background: rgba(0,0,0, 0.2);
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  border-radius: 0 0 15px 0;
-}*/
 
 article blockquote, article p {
   font-family: 'georges';
 }
 
 article blockquote {
-  text-align: center;
+  font-size: 26px;
   margin-bottom: 40px;
-  font-size: 27px;
+  text-align: center;
 }
 
 article p {
-  text-align: right;
   font-size: 22px;
-  margin-bottom: 10px;
+  text-align: right;
+}
+
+article a.edit-post {
+  bottom: 15px;
+  font-size: 0;
+  position: absolute;
+}
+
+article:hover a.edit-post:before {
+  content: url(images/edit.png);
 }
 
 section.content {
-  max-width: 70%;
   background: #fff;
-  margin: 60px auto;
-  text-align: center;
-  padding: 20px;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+  margin: 60px auto;
+  max-width: 70%;
+  padding: 20px;
+  text-align: center;
 }
 
 section.content.profile {
@@ -133,18 +126,34 @@ section.profile form label {
 
 .my-post-it {
   background: #FBFBFB;
-  width: 31.5%;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
   box-sizing: border-box;
   display: inline-block;
-  margin-bottom: 20px;
   margin-right: 2%;
+  margin-bottom: 20px;
   padding: 15px;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
-  vertical-align: top
+  vertical-align: top;
+  width: 31.5%;
 }
 
 .my-post-it:nth-child(3n+2) {
   margin-right: 0;
+}
+
+h2 {
+  font-weight: 400;
+}
+
+h2:focus {
+  outline: none;
+}
+
+h2:hover {
+  color: #FFD642;
+}
+
+h2[role="tab"] {
+  cursor: pointer;
 }
 
 /* === FORM ===*/
@@ -153,9 +162,9 @@ form {
 }
 
 label, select {
+  color: #222;
   font-family: 'Karla';
   font-size: 15px;
-  color: #222;
 }
 
 textarea,label {
@@ -163,10 +172,10 @@ textarea,label {
 }
 
 textarea {
-  margin-top: 5px;
   border-color: #bbb;
-  width: 100%;
   box-sizing: border-box;
+  margin-top: 5px;
+  width: 100%;
 }
 
 label {
@@ -175,8 +184,8 @@ label {
 
 select {
   background: none;
-  padding: 5px;
   border: 1px solid #bbb;
+  padding: 5px;
 }
 
 select:focus, textarea:focus {
@@ -184,15 +193,15 @@ select:focus, textarea:focus {
 }
 
 input[type="submit"] {
-  padding: 5px 10px;
-  border: none;
   background: #56D8C3;
+  border: none;
   cursor: pointer;
+  padding: 5px 10px;
 }
 
 input[type="color"] {
-  border: none;
   background: none;
+  border: none;
   height: 35px;
   vertical-align: middle;
   width: 35px;

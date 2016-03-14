@@ -54,8 +54,8 @@
     {% for postit in postits %}
         <article data-postit-id="{{ postit.post_id }}" style="background-color:{{ postit.color }}; left:{{ postit.x }}px; top:{{ postit.y }}px">
             <blockquote>{{ postit.text|safe }}</blockquote>
-            <p>De {{ postit.owner }}</p>
-            <a class="popup-link" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
+            <p>-{{ postit.owner }}</p>
+            <a class="edit-post" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
         </article>
     {% else %}
         <article>Pas de post-it(s)!</article>
