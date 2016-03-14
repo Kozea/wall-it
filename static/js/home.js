@@ -1,11 +1,12 @@
 $(document).ready(function() {
-
+    var mainWidth = $('main').width();
+    var mainHeight = $('main').height();
     $('article').draggable({
         cursor: 'move',
         containment: 'main',
         scroll: true,
-        scrollSensitivity: 50,
-        scrollSpeed: 50,
+        scrollSensitivity: 20,
+        scrollSpeed: 20,
         drag: function(event, ui){
             var matrix = $('main').css('transform');
             var values = matrix.match(/-?[\d\.]+/g);
@@ -15,9 +16,9 @@ $(document).ready(function() {
             else{
                 var zoom = values[0];
             }
-            var factor = (1 / zoom) - 1;
-            ui.position.top += Math.round((ui.position.top - ui.originalPosition.top) * factor);
-            ui.position.left += Math.round((ui.position.left - ui.originalPosition.left) * factor);
+
+            ui.position.top = Math.min(Math.max(ui.position.top / zoom, 0), mainHeight - $(this).outerHeight());
+            ui.position.left = Math.min(Math.max(ui.position.left / zoom, 0), mainWidth - $(this).outerWidth());
         }
     });
 
@@ -62,9 +63,10 @@ $(document).ready(function() {
         xLast = xScreen;
         yLast = yScreen;
 
-        $('main').css({
-            'transform-origin': xMain + 'px ' + yMain + 'px',
-            'transform': 'scale(' + scale + ')' + 'translate(' + xNew + 'px, ' + yNew + 'px' + ')'
-        });
+        // $('main').css({
+        //     'transform-origin': xMain + 'px ' + yMain + 'px',
+        //     'transform': 'scale(' + scale + ')' + 'translate(' + xNew + 'px, ' + yNew + 'px' + ')'
+        // });
+        $('main').css('transform', 'scale('+scale+')');
     });
 });

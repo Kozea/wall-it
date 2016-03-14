@@ -38,7 +38,10 @@ body {
 }
 
 main{
-  height: 1000px;
+  height: 3000px;
+  width: 3000px;
+  border: 1px #000000 solid;
+  transform-origin: top left;
 }
 
 header > h1 {
@@ -61,6 +64,8 @@ header > h1 a:hover {
 }
 
 nav {
+  left: 200px;
+  position: fixed;
   text-align: right;
   z-index: 1;
 }
@@ -101,13 +106,13 @@ article p {
   text-align: right;
 }
 
-article a#edit-post {
+article a.edit-post {
   bottom: 15px;
   font-size: 0;
   position: absolute;
 }
 
-article:hover a#edit-post:before {
+article:hover a.edit-post:before {
   content: url(images/edit.png);
 }
 
