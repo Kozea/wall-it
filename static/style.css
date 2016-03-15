@@ -37,14 +37,15 @@ body {
   margin: 0;
 }
 
-main{
+#wall{
   position: relative;
   height: 3000px;
   width: 6000px;
   border: 1px #000000 solid;
   transform-origin: top left;
-  margin: 65px;
   box-shadow: 0px 2px 10px rgba(0,0,0,0.5);
+  top: 65px;
+  left: 65px;
 }
 
 header{

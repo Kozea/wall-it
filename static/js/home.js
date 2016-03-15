@@ -1,27 +1,35 @@
 $(document).ready(function() {
-    $('main').css('transform', 'scale(1)');
-    var mainWidth = $('main').width();
-    var mainHeight = $('main').height();
+
+    var getWallScale = function() {
+        return parseFloat($('#wall').css('transform').match(/-?[\d\.]+/g)[0]);
+    };
+
+    var getElemFloatCss = function(element, css) {
+        return parseFloat($(element).css(css));
+    };
+
+    var defaultMaxScale = 1;
+    var defaultMinScale = 0.3;
+    var defaultScaling = 0.02;
+
+    $('#wall').css('transform', 'scale('+defaultMinScale+')');
+    $('main').css('height', getElemFloatCss('#wall', 'height') * getWallScale() + 'px');
+    $('main').css('width', getElemFloatCss('#wall', 'width') * getWallScale() + 'px');
+
+
     $('article').draggable({
         cursor: 'move',
         scroll: true,
         scrollSensitivity: 20,
         scrollSpeed: 20,
         drag: function(event, ui){
-            var matrix = $('main').css('transform');
-            var values = matrix.match(/-?[\d\.]+/g);
-            // if(values == null){
-            //     zoom = 1;
-            // }
-            // else{
-            zoom = values[0];
-            // }
-            ui.position.top = Math.min(Math.max(ui.position.top / zoom, 0), mainHeight - $(this).outerHeight());
-            ui.position.left = Math.min(Math.max(ui.position.left / zoom, 0), mainWidth - $(this).outerWidth());
+            var zoom = getWallScale();
+            ui.position.top = Math.min(Math.max(ui.position.top / zoom, 0), getElemFloatCss('#wall', 'height') - $(this).outerHeight());
+            ui.position.left = Math.min(Math.max(ui.position.left / zoom, 0), getElemFloatCss('#wall', 'width') - $(this).outerWidth());
         }
     });
 
-    $('main').droppable({
+    $('#wall').droppable({
         drop: function(event, ui){
             var x = parseInt(ui.position.left);
             var y = parseInt(ui.position.top);
@@ -30,25 +38,46 @@ $(document).ready(function() {
         }
     });
 
-    var scale = 1;
-    $('main').bind('mousewheel', function(e) {
-
+    $('#wall').bind('mousewheel', function(e) {
         e.preventDefault();
+
+        var isZooming = false;
+        var scale = getWallScale();
+        var mouseLeft = e.clientX - getElemFloatCss('#wall', 'left');
+        var mouseTop = e.clientY - getElemFloatCss('#wall', 'left');
+        var oldZoom = scale;
 
         if (e.originalEvent.wheelDelta >= 0)
         {
-            if (scale < 1) {
-                scale += 0.02;
+            if (scale < defaultMaxScale) {
+                scale += defaultScaling;
+                isZooming = true;
             }
         }
         else
         {
-            if (scale > 0.3) {
-                scale -= 0.02;
+            if (scale > defaultMinScale) {
+                scale -= defaultScaling;
+                isZooming = true;
             }
         }
 
-        $('main').css('transform', 'scale('+scale+')');
-        $('body').css('height', parseFloat($('main').css('height'))*scale + 'px');
+        var ratio = oldZoom / scale;
+        var deltaWidth = (1 - ratio) * $('#wall').outerWidth() * scale;
+        var deltaTop = (1 - ratio) * $('#wall').outerHeight() * scale;
+        var mouseXRatio = mouseLeft / (getElemFloatCss('#wall', 'width') * scale);
+        var mouseYRatio = mouseTop / (getElemFloatCss('#wall', 'height') * scale);
+
+        if (isZooming) {
+
+            $('main').css('height', getElemFloatCss('#wall', 'height') * scale + 'px');
+            $('main').css('width', getElemFloatCss('#wall', 'width') * scale + 'px');
+
+            $('#wall').css({
+                'transform': 'scale('+scale+')',
+                'left': getElemFloatCss('#wall', 'left')-deltaWidth*mouseXRatio + 'px',
+                'top': getElemFloatCss('#wall', 'top')-deltaTop*mouseYRatio + 'px'
+            });
+        }
     });
 });
