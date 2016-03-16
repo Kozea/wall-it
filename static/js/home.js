@@ -29,16 +29,36 @@ $(document).ready(function() {
         }
     });
 
-    $('#wall').droppable({
+    $('#wall')
+    .mousedown(function(event) {
+        if(event.which == 2) {
+            if ($('#wall').hasClass('ui-draggable')) {
+                $('#wall').draggable('enable');
+            }
+            else {
+                $('#wall').draggable();
+            }
+            event.which = 1;
+        }
+    })
+    .trigger({
+        type: 'mousedown',
+        which: 2
+    })
+    .mouseup(function(event) {
+        if ($('#wall').hasClass('ui-draggable')) {
+            $('#wall').draggable('disable');
+        }
+    })
+    .droppable({
         drop: function(event, ui){
             var x = parseInt(ui.position.left);
             var y = parseInt(ui.position.top);
             var id = ui.helper.data( 'postitId' );
             $.post( '/save_position', { x: x, y: y, post_id: id });
         }
-    });
-
-    $('#wall').bind('mousewheel', function(e) {
+    })
+    .bind('mousewheel', function(e) {
         e.preventDefault();
 
         var isZooming = false;
