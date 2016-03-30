@@ -1,3 +1,10 @@
+<script type="text/javascript">
+    $('.cancel-delete').on('click', function(){
+        $('.popup').remove();
+        $('header, main, footer').css({'pointer-events': 'auto', 'opacity': '1'});
+        $('html').css('background-color', 'transparent');
+    });
+</script>
 <div class="popup">
     <h1>Suppression</h1>
     <p>
@@ -5,6 +12,7 @@
     </p>
     <form action="{{ url_for('delete', post_id=post_id)}}" method="post">
         <input type="hidden" name="post_id" value="{{post_id}}">
-        <input type="submit" name="ok" value="OK" onclick="$('.popup').remove()">
+        <input class="cancel-delete" type="button" name"cancel" value="Non">
+        <input type="submit" name="ok" value="Oui" onclick="$('.popup').remove()">
     </form>
 </div>
