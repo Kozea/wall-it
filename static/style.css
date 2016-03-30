@@ -103,7 +103,7 @@ article {
   box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
   padding: 15px;
   position: absolute;
-  width: 200px;
+  width: 230px;
 }
 
 article blockquote, article p {
@@ -121,7 +121,7 @@ article p {
   text-align: right;
 }
 
-article a.edit-post {
+article a.edit-post, article a.delete {
   bottom: 15px;
   font-size: 0;
   position: absolute;
@@ -130,6 +130,15 @@ article a.edit-post {
 article:hover a.edit-post:before {
   content: url(images/edit.png);
 }
+
+article a.delete {
+  left: 40px;
+}
+
+article:hover a.delete:before {
+  content: url(images/delete.png);
+}
+
 
 /* other pages style */
 section.content {
@@ -167,9 +176,7 @@ section.profile form label {
 }
 
 /* === FORM ===*/
-form {
-  padding: 10px;
-}
+
 
 label, select {
   color: #222;

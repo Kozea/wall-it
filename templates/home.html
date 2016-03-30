@@ -11,7 +11,7 @@
             <blockquote>{{ postit.text|safe }}</blockquote>
             <p>-{{ postit.owner }}</p>
             <a class="popup-link edit-post" href="{{ url_for('modify', post_id=postit.post_id) }}">Modifier</a>
-            <a class="popup-link" href="{{ url_for('delete', post_id=postit.post_id) }}">Supprimer</a>
+            <a class="popup-link delete" href="{{ url_for('delete', post_id=postit.post_id) }}">Supprimer</a>
         </article>
         {% else %}
         <article>Pas de post-it(s)!</article>
