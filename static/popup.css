@@ -27,3 +27,8 @@
   font-weight: 400;
   text-align: center;
 }
+
+.popup p {
+  text-align: center;
+  margin-top: 50px;
+}

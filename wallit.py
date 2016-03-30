@@ -113,7 +113,7 @@ def display_wall():
             "x": row[4],
             "y": row[5]
         })
-    return render_template('home.html', postits=postits, title='Accueil')
+    return render_template('home.html', postits=postits)
 
 
 @app.route('/save_position', methods=['POST'])
@@ -162,7 +162,7 @@ def display_config():
             'text':row[1]
         })
     g.db.commit()
-    return render_template('profile.html', title="Profile", color=color,
+    return render_template('profile.html', color=color,
         postits=my_postits)
 
 
@@ -187,7 +187,7 @@ def add_post_it():
                 g.db.commit()
             flash('A new post-it was successefully added')
         return redirect(url_for('display_wall'))
-    return render_template('new_post_it.html', title="Ajout de post-it")
+    return render_template('new_post_it.html')
 
 
 @app.route('/statistics')
@@ -197,8 +197,7 @@ def display_stats():
     cur_post_count = g.db.execute('select count(post_id) from postit')
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
-    return render_template('statistics.html', stat_post_it=stat_post_count
-                ,title="Statistiques")
+    return render_template('statistics.html', stat_post_it=stat_post_count)
 
 
 @app.route('/charts/post_it_by_user_pie.svg')
@@ -237,9 +236,28 @@ def modify(post_id):
                 ['#FFFFFF', request.form['owner']])
             g.db.commit()
         return redirect(url_for('display_wall'))
-    return render_template('modify_post_it.html', title="Modifier un post-it",
-        post_id=post_id, owner=owner, text=text)
+    return render_template('modify_post_it.html', post_id=post_id, owner=owner,
+        text=text)
 
+
+@app.route('/delete/<int:post_id>', methods=['GET', 'POST'])
+@auth
+def delete(post_id):
+    cur_postit = g.db.execute(
+        "select owner from postit where post_id=?", [post_id])
+    for row in cur_postit.fetchall():
+        owner = row[0]
+    vowels = 'aeiouïüéè'
+    if owner[0] in vowels or owner[0] in vowels.upper():
+        prefix = "d'"
+    else:
+        prefix = "de "
+    if request.method == 'POST':
+        g.db.execute('delete from postit where post_id=?', [post_id])
+        g.db.commit()
+        return redirect(url_for('display_wall'))
+    return render_template('delete.html', post_id=post_id, owner=owner,
+        prefix=prefix)
 
 if __name__ == '__main__':
     app.run()
