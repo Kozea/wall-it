@@ -9,7 +9,7 @@ $(document).ready(function() {
     };
 
     var defaultMaxScale = 1;
-    var defaultMinScale = 0.3;
+    var defaultMinScale = 0.2;
     var defaultScaling = 0.02;
 
     $('#wall').css('transform', 'scale('+defaultMinScale+')');

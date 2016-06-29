@@ -90,12 +90,12 @@ nav ul li:hover a {
 /* main */
 main #wall {
   border: 1px #5C5C5C solid;
-  height: 3000px;
+  height: 4500px;
   left: 65px;
   position: relative;
   top: 65px;
   transform-origin: top left;
-  width: 6000px;
+  width: 9000px;
 }
 
 /*post-it style*/
