@@ -49,51 +49,43 @@ def auth(function):
     """Wrapper checking if the user is logged in."""
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if session.get('person'):
-            return function(*args, **kwargs)
-        return redirect(FLOW.step1_get_authorize_url())
+        if session.get('users'):
+            if session.get('person') in session.get('users'):
+                return function(*args, **kwargs)
+            else:
+                return redirect(FLOW.step1_get_authorize_url())
+        abort(403)
     return wrapper
 
 
 @app.route('/oauth2callback')
 def oauth2callback():
     code = request.args.get('code')
-    if code:
-        credentials = FLOW.step2_exchange(code)
-        http = credentials.authorize(httplib2.Http())
-        _, content = http.request(
-            "https://people.googleapis.com/v1/people/me")
-        data = json.loads(content.decode('utf-8'))
-        if 'names' in data:
-            session['person'] = data['names'][0]['displayName']
-        _, users_content = http.request(
-            "https://people.googleapis.com/v1/people/me/connections"
-            "?requestMask.includeField=person.names%2Cperson.emailAddresses"
-            "&pageSize=500")
-        users_data = json.loads(users_content.decode('utf-8'))
-        session['users'] = []
-        for connection in users_data['connections']:
-            if 'names' in connection and 'emailAddresses' in connection:
-                for address in connection['emailAddresses']:
-                    if address['value'].endswith('@kozea.fr'):
-                        session['users'].append('%s %s' % (
-                            connection['names'][0].get('givenName', ''),
-                            connection['names'][0].get('familyName', '')))
-                        break
-        return redirect(url_for('display_wall'))
-    else:
-        return redirect(url_for('index'))
+    credentials = FLOW.step2_exchange(code)
+    http = credentials.authorize(httplib2.Http())
+    _, content = http.request(
+        "https://people.googleapis.com/v1/people/me")
+    data = json.loads(content.decode('utf-8'))
+    if 'names' in data:
+        session['person'] = data['names'][0]['displayName']
+    _, users_content = http.request(
+        "https://people.googleapis.com/v1/people/me/connections"
+        "?requestMask.includeField=person.names%2Cperson.emailAddresses"
+        "&pageSize=500")
+    users_data = json.loads(users_content.decode('utf-8'))
+    session['users'] = []
+    for connection in users_data['connections']:
+        if 'names' in connection and 'emailAddresses' in connection:
+            for address in connection['emailAddresses']:
+                if address['value'].endswith('@kozea.fr'):
+                    session['users'].append('%s %s' % (
+                        connection['names'][0].get('givenName', ''),
+                        connection['names'][0].get('familyName', '')))
+                    break
+    return redirect(url_for('display_wall'))
 
 
-@app.route('/', methods=('GET', 'POST'))
-@auth
-def index():
-    if session['person']:
-        return redirect(url_for('display_wall'))
-    else:
-        abort(403)
-
-
+@app.route('/')
 @app.route('/home')
 @auth
 def display_wall():
