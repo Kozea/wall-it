@@ -27,4 +27,4 @@ Initialisation de la Bdd :
  $ sqlite3 /tmp/wallit.db < schema.sql
 ```
 
-ATTENTION : Si vous voulez ajouter des post-its, vérifiez bien que la personne liée au post-it est dans vos contacts google.
+NB: il se peut que la liste des contacts des popups d'ajout et de modification ne soit pas complète. Dans ce cas, il faut les ajouter dans vos contacts Google. (GMail > Contacts > Annuaire > tout sélectionner > ajouter à mes contacts)
