@@ -1,0 +1,7 @@
+<div class="popup">
+    <h1>Imprimer</h1>
+    <form action="{{ url_for('print_panel') }}" method="post">
+        <label>Nom de fichier <input type="text" name="title" placeholder="ex: lancement_sprint" required autofocus></label>
+        <input type="submit" value="Imprimer">
+    </form>
+</div>

@@ -1,7 +1,7 @@
 <div class="popup">
     <h1>Ajouter un Post-it</h1>
     <form action="{{ url_for('add_post_it') }}" method="post">
-        <label>Texte<textarea name="text" rows=5 cols=40 required>{{text}}</textarea></label>
+        <label>Texte<textarea name="text" rows=5 cols=40 required autofocus>{{text}}</textarea></label>
         <label>De
             <select name="owner" required>
                 {% for user in session.users|sort %}

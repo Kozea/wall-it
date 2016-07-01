@@ -15,9 +15,15 @@
             <h1><a href="{{ url_for('display_wall') }}">Wall-it</a></h1>
             <nav>
                 <ul>
-                    <li><a href="{{ url_for('display_stats') }}">Statistiques</a>
-                    <li><a href="{{ url_for('display_config') }}">Profil</a>
-                    <li><a class="popup-link" href="{{ url_for('add_post_it') }}">Ajouter post-it</a>
+                    <li><a href="{{ url_for('job_panel') }}">Mode Réunion</a>
+                    {% if request.path == url_for('job_panel') %}
+                        <li><a class="popup-link" href="{{ url_for('new_label') }}">Label</a>
+                        <li><a class="popup-link" href="{{ url_for('print_panel') }}">Imprimer</a>
+                    {% else %}
+                        <li><a href="{{ url_for('display_stats') }}">Statistiques</a>
+                        <li><a href="{{ url_for('display_config') }}">Profil</a>
+                        <li><a class="popup-link" href="{{ url_for('add_post_it') }}">Ajouter post-it</a>
+                    {% endif %}
                 </ul>
             </nav>
         </header>

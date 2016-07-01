@@ -88,14 +88,15 @@ nav ul li:hover a {
 }
 
 /* main */
-main #wall {
+main .wall {
   border: 1px #5C5C5C solid;
-  height: 4500px;
+  height: 3000px;
   left: 65px;
   position: relative;
   top: 65px;
   transform-origin: top left;
-  width: 9000px;
+  transform: scale(0.3);
+  width: 6000px;
 }
 
 /*post-it style*/

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="wall">
+        {% for panel in session.get('job_panel') %}
+            {% for k, v in panel.items() %}
+                <article  data-label-id="{{ k }}" style="background-color:{{ v.color }}; left:{{ v.x }}px; top:{{ v.y }}px">
+                    <blockquote>{{ v.text|safe }}</blockquote>
+                </article>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}
