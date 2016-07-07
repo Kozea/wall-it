@@ -1,7 +1,16 @@
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('form').on('submit', function() {
+      $('input[id=html-to-print]').val('<main>'+$('main').html()+'</main>')
+    });
+  });
+</script>
+
 <div class="popup">
-    <h1>Imprimer</h1>
-    <form action="{{ url_for('print_panel') }}" method="post">
-        <label>Nom de fichier <input type="text" name="title" placeholder="ex: lancement_sprint" required autofocus></label>
-        <input type="submit" value="Imprimer">
-    </form>
+  <h1>Imprimer</h1>
+  <form action="{{ url_for('print_panel') }}" method="post">
+    <input id="html-to-print" type="hidden" name="html_to_print">
+    <label>Nom de fichier <input type="text" name="title" placeholder="ex: lancement_sprint" required autofocus></label>
+    <input type="submit" value="Imprimer">
+  </form>
 </div>
