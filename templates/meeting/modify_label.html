@@ -1,0 +1,9 @@
+<div class="popup">
+  <h1>Modification</h1>
+  <form action="{{ url_for('modify_label', label_id=label_id) }}" method="post">
+    <input type="hidden" name="label_id" value="{{label_id}}">
+    <label>Texte <textarea name="text" rows=5 cols=40 required autofocus>{{text}}</textarea></label>
+    <label>Couleur <input type="color" name="color" value="{{color}}"></label>
+    <input type="submit" value="Modifier">
+  </form>
+</div>
