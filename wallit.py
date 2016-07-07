@@ -4,8 +4,7 @@ import json
 import pygal
 from pygal.style import CleanStyle
 from flask import (
-    abort, Flask, request, session, g, redirect, url_for, render_template, flash)
-from contextlib import closing
+    Flask, request, session, g, redirect, url_for, render_template, flash)
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
 
@@ -27,7 +26,7 @@ def connect_db():
 
 
 def init_db():
-    with closing(connect_db()) as db:
+    with connect_db() as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
@@ -45,16 +44,18 @@ def teardown_request(exception):
         db.close()
 
 
+@app.route('/not_allowed')
+def not_allowed():
+    return render_template('403.html')
+
+
 def auth(function):
     """Wrapper checking if the user is logged in."""
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if session.get('users'):
-            if session.get('person') in session.get('users'):
-                return function(*args, **kwargs)
-            else:
-                return redirect(FLOW.step1_get_authorize_url())
-        abort(403)
+        if session.get('users') and session.get('person'):
+            return function(*args, **kwargs)
+        return redirect(FLOW.step1_get_authorize_url())
     return wrapper
 
 
@@ -66,22 +67,25 @@ def oauth2callback():
     _, content = http.request(
         "https://people.googleapis.com/v1/people/me")
     data = json.loads(content.decode('utf-8'))
-    if 'names' in data:
-        session['person'] = data['names'][0]['displayName']
-    _, users_content = http.request(
-        "https://people.googleapis.com/v1/people/me/connections"
-        "?requestMask.includeField=person.names%2Cperson.emailAddresses"
-        "&pageSize=500")
-    users_data = json.loads(users_content.decode('utf-8'))
-    session['users'] = []
-    for connection in users_data['connections']:
-        if 'names' in connection and 'emailAddresses' in connection:
-            for address in connection['emailAddresses']:
-                if address['value'].endswith('@kozea.fr'):
-                    session['users'].append('%s %s' % (
-                        connection['names'][0].get('givenName', ''),
-                        connection['names'][0].get('familyName', '')))
-                    break
+    if data.get('emailAddresses')[0].get('value').endswith('@kozea.fr'):
+        if 'names' in data:
+            session['person'] = data['names'][0]['displayName']
+        _, users_content = http.request(
+            "https://people.googleapis.com/v1/people/me/connections"
+            "?requestMask.includeField=person.names%2Cperson.emailAddresses"
+            "&pageSize=500")
+        users_data = json.loads(users_content.decode('utf-8'))
+        session['users'] = []
+        for connection in users_data['connections']:
+            if 'names' in connection and 'emailAddresses' in connection:
+                for address in connection['emailAddresses']:
+                    if address['value'].endswith('@kozea.fr'):
+                        session['users'].append('%s %s' % (
+                            connection['names'][0].get('givenName', ''),
+                            connection['names'][0].get('familyName', '')))
+                        break
+    else:
+        return redirect(url_for('not_allowed'))
     return redirect(url_for('display_wall'))
 
 
@@ -150,12 +154,11 @@ def display_config():
         [session['person']])
     for row in cur_post.fetchall():
         my_postits.append({
-            'id':row[0],
-            'text':row[1]
+            'id': row[0],
+            'text': row[1]
         })
     g.db.commit()
-    return render_template('profile.html', color=color,
-        postits=my_postits)
+    return render_template('profile.html', color=color, postits=my_postits)
 
 
 @app.route('/new', methods=['GET', 'POST'])
@@ -219,7 +222,7 @@ def modify(post_id):
         for owner in cur_owners_with_color.fetchall():
             owners_with_color.append(owner[0])
         g.db.execute(
-        "update postit set text=?, owner=? where post_id=?",
+            "update postit set text=?, owner=? where post_id=?",
             [request.form.get('text'), request.form.get('owner'), post_id])
         g.db.commit()
         if request.form.get('owner') not in owners_with_color:
@@ -229,7 +232,7 @@ def modify(post_id):
             g.db.commit()
         return redirect(url_for('display_wall'))
     return render_template('modify_post_it.html', post_id=post_id, owner=owner,
-        text=text)
+                           text=text)
 
 
 @app.route('/delete/<int:post_id>', methods=['GET', 'POST'])
@@ -249,7 +252,7 @@ def delete(post_id):
         g.db.commit()
         return redirect(url_for('display_wall'))
     return render_template('delete.html', post_id=post_id, owner=owner,
-        prefix=prefix)
+                           prefix=prefix)
 
 if __name__ == '__main__':
     app.run()

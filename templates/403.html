@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+
+{% block main %}
+  <article id='not_allowed'>
+    Si tu ne travaille pas chez Kozea, tu ne peut pas accéder à ce site web.
+    <img src="{{ url_for('static', filename='images/calimero.png') }}" />
+  </article>
+{% endblock main %}

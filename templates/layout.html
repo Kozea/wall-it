@@ -5,14 +5,17 @@
         <title>Wall-it</title>
         <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
         <link rel=stylesheet type=text/css href="{{ url_for('static', filename='popup.css') }}">
-        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-        <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+        {% if request.path != url_for('not_allowed') %}
+          <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+          <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+          <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+        {% endif %}
         {% block script %}{% endblock %}
     </head>
     <body>
         <header>
             <h1><a href="{{ url_for('display_wall') }}">Wall-it</a></h1>
+            {% if request.path != url_for('not_allowed') %}
             <nav>
                 <ul>
                     <li><a href="{{ url_for('display_stats') }}">Statistiques</a>
@@ -20,6 +23,7 @@
                     <li><a class="popup-link" href="{{ url_for('add_post_it') }}">Ajouter post-it</a>
                 </ul>
             </nav>
+            {% endif %}
         </header>
         <main>
             {% block main %}{% endblock %}
