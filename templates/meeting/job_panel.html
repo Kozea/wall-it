@@ -1,17 +1,19 @@
 {% extends "layout.html" %}
 
 {% block script %}
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}
 
 {% block main %}
-    <div class="wall">
-        {% for panel in session.get('job_panel') %}
-            {% for k, v in panel.items() %}
-                <article  data-label-id="{{ k }}" style="background-color:{{ v.color }}; left:{{ v.x }}px; top:{{ v.y }}px">
-                    <blockquote>{{ v.text|safe }}</blockquote>
-                </article>
-            {% endfor %}
-        {% endfor %}
-    </div>
+  <div id="meeting" class="wall">
+    {% for label in session.get('job_panel') %}
+      {% for k, v in label.items() %}
+        <article class="label" data-label-id="{{ k }}" style="background-color:{{ v.color }}; left:{{ v.x }}px; top:{{ v.y }}px">
+          <blockquote>{{ v.text|safe }}</blockquote>
+          <a class="popup-link edit-post" href="{{ url_for('modify_label', label_id=k) }}">Modifier</a>
+          <a class="popup-link delete" href="{{ url_for('delete_label', label_id=k) }}">Supprimer</a>
+        </article>
+      {% endfor %}
+    {% endfor %}
+  </div>
 {% endblock %}

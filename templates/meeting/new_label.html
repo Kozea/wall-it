@@ -1,8 +1,8 @@
 <div class="popup">
-    <h1>Ajouter un label</h1>
-    <form action="{{ url_for('new_label') }}" method="post">
-        <label>Texte<textarea name="text" rows=5 cols=40 required autofocus></textarea></label>
-        <label>Couleur<input type="color" name="color" value="#ffffff" required></label>
-        <input type="submit" value="Ajouter">
-    </form>
+  <h1>Ajouter un post-it</h1>
+  <form action="{{ url_for('new_label') }}" method="post">
+    <label>Texte<textarea name="text" rows=5 cols=40 required autofocus></textarea></label>
+    <label>Couleur<input type="color" name="color" value="#ffffff" required></label>
+    <input type="submit" value="Ajouter">
+  </form>
 </div>

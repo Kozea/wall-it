@@ -266,7 +266,7 @@ def delete(post_id):
         g.db.commit()
         return redirect(url_for('display_wall'))
     return render_template(
-        'delete.html', post_id=post_id, owner=owner, prefix=prefix)
+        'delete_post_it.html', post_id=post_id, owner=owner, prefix=prefix)
 
 
 @app.route('/job_panel')
@@ -293,15 +293,49 @@ def new_label():
     return render_template('meeting/new_label.html')
 
 
+@app.route('/modify_label/<int:label_id>', methods=['GET', 'POST'])
+@auth
+def modify_label(label_id):
+    for label in session.get('job_panel'):
+        color = None
+        text = ''
+        if label.get(str(label_id)):
+            color = label.get(str(label_id)).get('color', None)
+            text = label.get(str(label_id)).get('text', None)
+            break
+    if request.method == 'POST':
+        color = request.form.get('color')
+        text = request.form.get('text')
+        for label in session.get('job_panel'):
+            label[str(label_id)]['text'] = text
+            label[str(label_id)]['color'] = color
+        return redirect(url_for('job_panel'))
+    return render_template(
+        'meeting/modify_label.html', label_id=label_id, color=color, text=text)
+
+
+@app.route('/delete_label/<int:label_id>', methods=['GET', 'POST'])
+@auth
+def delete_label(label_id):
+    if request.method == 'POST':
+        for i in range(len(session.get('job_panel'))):
+            if session['job_panel'][i].get(str(label_id)):
+                session['job_panel'].pop(i)
+                break
+        return redirect(url_for('job_panel'))
+    return render_template('meeting/delete_label.html', label_id=label_id)
+
+
 @app.route('/print_panel', methods=['GET', 'POST'])
 @auth
 def print_panel():
     if request.method == 'POST':
         if request.form.get('title'):
             today = datetime.today().strftime('%d-%m-%Y_%H:%M:%S')
-            content_string = render_template('meeting/job_panel.html')
+            content_string = request.form.get('html_to_print')
             doc = expanduser('~/Documents/')
-            my_file = doc+request.form.get('title')+'_'+today+'.pdf'
+            my_file = "{}{}_{}.pdf".format(
+                doc, request.form.get('title'), today)
             data_style = ""
             my_style = open('static/style.css', 'r')
             lines = my_style.readlines()
