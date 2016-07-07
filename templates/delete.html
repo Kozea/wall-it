@@ -1,18 +1,10 @@
 <script type="text/javascript">
-    $('.cancel-delete').on('click', function(){
-        $('.popup').remove();
-        $('header, main, footer').css({'pointer-events': 'auto', 'opacity': '1'});
-        $('html').css('background-color', 'transparent');
-    });
+  $('.cancel-delete').on('click', function(){
+    $('.popup').remove();
+    $('header, main, footer').css({'pointer-events': 'auto', 'opacity': '1'});
+    $('html').css('background-color', 'transparent');
+  });
 </script>
 <div class="popup">
-    <h1>Suppression</h1>
-    <p>
-        Veux tu vraiment supprimer le post-it {{prefix}}{{owner}}?<br>C'est dommage :'(
-    </p>
-    <form action="{{ url_for('delete', post_id=post_id)}}" method="post">
-        <input type="hidden" name="post_id" value="{{post_id}}">
-        <input class="cancel-delete" type="button" name"cancel" value="Non">
-        <input type="submit" name="ok" value="Oui" onclick="$('.popup').remove()">
-    </form>
+  {% block delete %}{% endblock %}
 </div>
