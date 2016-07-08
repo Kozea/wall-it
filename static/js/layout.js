@@ -26,4 +26,8 @@ $(document).ready(function() {
     e.preventDefault();
     getPopUp($link);
   });
+
+  $('#last_li').on('mousedown', function(e) {
+    $(this).css('box-shadow', 'none');
+  });
 });
