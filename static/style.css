@@ -157,6 +157,19 @@ article:hover a.delete:before {
   content: url(images/delete.png);
 }
 
+article#not_allowed {
+  position: fixed;
+  top: 100px;
+  left: 200px;
+  width: 600px;
+  background-color: #ffffff;
+  font-size: 18px;
+}
+
+article#not_allowed img {
+  width: 250px;
+  float: right;
+}
 
 /* other pages style */
 section.content {
