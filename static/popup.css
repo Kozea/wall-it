@@ -9,6 +9,7 @@
   top: 320px;
   width: 30%;
   z-index: 100000000;
+  text-align: center;
 }
 
 .popup a {

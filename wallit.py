@@ -2,11 +2,16 @@ import sqlite3
 import httplib2
 import json
 import pygal
-from pygal.style import CleanStyle
+import random as rand
+
+from datetime import datetime
 from flask import (
     Flask, request, session, g, redirect, url_for, render_template, flash)
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
+from os.path import expanduser
+from pygal.style import CleanStyle
+from weasyprint import HTML, CSS
 
 
 app = Flask(__name__)
@@ -116,11 +121,23 @@ def display_wall():
 @auth
 def save_position():
     """Get the post request from the page / when we drop a post-it."""
-    g.db.execute(
-        "update postit set x=?, y=? where post_id=?",
-        [request.form.get(key) for key in ('x', 'y', 'post_id')])
-    g.db.commit()
-    return redirect(url_for('display_wall'))
+    if request.form.get('post_id'):
+        g.db.execute(
+            "update postit set x=?, y=? where post_id=?",
+            [request.form.get(key) for key in ('x', 'y', 'post_id')])
+        g.db.commit()
+        return redirect(url_for('display_wall'))
+    else:
+        x = request.form.get('x')
+        y = request.form.get('y')
+        label_id = request.form.get('label_id')
+        for panel in session.get('job_panel'):
+            for k, v in panel.items():
+                if label_id == k:
+                    v['x'] = x
+                    v['y'] = y
+                    break
+        return redirect(url_for('job_panel'))
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -251,8 +268,96 @@ def delete(post_id):
         g.db.execute('delete from postit where post_id=?', [post_id])
         g.db.commit()
         return redirect(url_for('display_wall'))
-    return render_template('delete.html', post_id=post_id, owner=owner,
-                           prefix=prefix)
+    return render_template(
+        'delete_post_it.html', post_id=post_id, owner=owner, prefix=prefix)
+
+
+@app.route('/job_panel')
+@auth
+def job_panel():
+    if not session.get('job_panel'):
+        session['job_panel'] = []
+    return render_template('meeting/job_panel.html')
+
+
+@app.route('/new_label', methods=['GET', 'POST'])
+@auth
+def new_label():
+    if request.method == 'POST':
+        already_used_rand = []
+        random_id = rand.randint(0, 10000)
+        while random_id in already_used_rand:
+            random_id = rand.randint(0, 10000)
+        text = request.form.get('text')
+        color = request.form.get('color')
+        session['job_panel'].append({str(random_id): {
+            'text': text, 'color': color, 'x': 0, 'y': 0}})
+        return redirect(url_for('job_panel'))
+    return render_template('meeting/new_label.html')
+
+
+@app.route('/modify_label/<int:label_id>', methods=['GET', 'POST'])
+@auth
+def modify_label(label_id):
+    for label in session.get('job_panel'):
+        color = None
+        text = ''
+        if label.get(str(label_id)):
+            color = label.get(str(label_id)).get('color', None)
+            text = label.get(str(label_id)).get('text', None)
+            break
+    if request.method == 'POST':
+        color = request.form.get('color')
+        text = request.form.get('text')
+        for label in session.get('job_panel'):
+            label[str(label_id)]['text'] = text
+            label[str(label_id)]['color'] = color
+        return redirect(url_for('job_panel'))
+    return render_template(
+        'meeting/modify_label.html', label_id=label_id, color=color, text=text)
+
+
+@app.route('/delete_label/<int:label_id>', methods=['GET', 'POST'])
+@auth
+def delete_label(label_id):
+    if request.method == 'POST':
+        for i in range(len(session.get('job_panel'))):
+            if session['job_panel'][i].get(str(label_id)):
+                session['job_panel'].pop(i)
+                break
+        return redirect(url_for('job_panel'))
+    return render_template('meeting/delete_label.html', label_id=label_id)
+
+
+@app.route('/print_panel', methods=['GET', 'POST'])
+@auth
+def print_panel():
+    if request.method == 'POST':
+        if request.form.get('title'):
+            today = datetime.today().strftime('%d-%m-%Y_%H:%M:%S')
+            content_string = request.form.get('html_to_print')
+            doc = expanduser('~/Documents/')
+            my_file = "{}{}_{}.pdf".format(
+                doc, request.form.get('title'), today)
+            data_style = ""
+            my_style = open('static/style.css', 'r')
+            lines = my_style.readlines()
+            for line in lines:
+                data_style += line.strip()
+            my_style.close()
+            data_style += """
+                @page {
+                    margin: 0;
+                    width: 1900px;
+                    height: 1000px;
+                    size: A3 landscape;
+                }"""
+            HTML(string=content_string).write_pdf(
+                target=my_file, stylesheets=[CSS(string=data_style)])
+            del(session['job_panel'])
+            return redirect(url_for('job_panel'))
+    return render_template('meeting/print.html')
+
 
 if __name__ == '__main__':
     app.run()

@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <section class="content">
-        Il y a combien de post-it(s)? {{ stat_post_it }}
-        <figure>
-            <embed type="image/svg+xml" src="{{url_for('post_it_by_user_pie')}}" width="600" height="600" />
-        </figure>
-    </section>
+  <section class="content">
+    Il y a combien de post-it(s)? {{ stat_post_it }}
+    <figure>
+      <embed type="image/svg+xml" src="{{url_for('post_it_by_user_pie')}}" width="600" height="600" />
+    </figure>
+  </section>
 {% endblock %}

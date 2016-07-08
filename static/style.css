@@ -69,12 +69,24 @@ header > h1 a:hover {
 nav {
   left: 200px;
   position: fixed;
+  width: 1650px;
   z-index: 1;
 }
 
 nav ul li {
   display: inline-block;
   padding: 16px 5px;
+}
+
+nav ul li#last_li {
+  float: right;
+  border: 1px solid #848484;
+  border-radius: 2px;
+  padding: 11px 5px 11px;
+  margin: 8px;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  background-color: rgba(0,0,0,0.05);
 }
 
 nav ul li a {
@@ -88,14 +100,15 @@ nav ul li:hover a {
 }
 
 /* main */
-main #wall {
+main .wall {
   border: 1px #5C5C5C solid;
-  height: 4500px;
+  height: 3000px;
   left: 65px;
   position: relative;
   top: 65px;
   transform-origin: top left;
-  width: 9000px;
+  transform: scale(0.3);
+  width: 6000px;
 }
 
 /*post-it style*/
@@ -114,6 +127,11 @@ article blockquote {
   font-size: 26px;
   margin-bottom: 40px;
   text-align: center;
+}
+
+article.label blockquote {
+  font-family: 'Karla';
+  font-size: 30px;
 }
 
 article p {
