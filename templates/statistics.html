@@ -2,9 +2,26 @@
 
 {% block main %}
   <section class="content">
-    Il y a combien de post-it(s)? {{ stat_post_it }}
+    Il y a combien de post-it(s)? {{ stat_post_count }}
     <figure>
-      <embed type="image/svg+xml" src="{{url_for('post_it_by_user_pie')}}" width="600" height="600" />
+      <embed type="image/svg+xml" src="{{url_for('post_it_by_user')}}" width="700" height="700" />
     </figure>
+    <section>
+      <h2>Filtres</h2>
+      <form action="{{url_for('display_stats')}}" method="post">
+        <label>Par utilisateur <input type="search" name="owner" placeholder="ex: 'Clémence'"></label>
+        <label>Par contenu <input type="search" name="text" placeholder="ex: 'ENFINTON!'"></label>
+        <input type="submit" value="Valider">
+      </form>
+      {% for post_it in all_post_its %}
+      <section class="some-post-it" style="background-color: {{ post_it.color }}">
+        <h3>Post-it N°{{ post_it.id }}</h3>
+        <blockquote>{{ post_it.text|safe }}</blockquote>
+        <p>{{ post_it.owner }}</p>
+      </section>
+      {% else %}
+      <p>Pas de post-it(s) :'(</p>
+      {% endfor %}
+    </section>
   </section>
 {% endblock %}

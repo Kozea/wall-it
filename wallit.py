@@ -202,27 +202,60 @@ def add_post_it():
     return render_template('new_post_it.html')
 
 
-@app.route('/statistics')
+@app.route('/statistics', methods=['GET', 'POST'])
 @auth
 def display_stats():
     """Display some statistics from the application"""
+    cur_all_post_it = g.db.execute(
+        "select post_id, p.owner, text , code_color "
+        "from postit p, color c "
+        "where p.owner=c.owner "
+        "order by post_id desc")
+    all_post_its = [{
+        'id': row[0],
+        'owner': row[1],
+        'text': row[2],
+        'color': row[3]} for row in cur_all_post_it.fetchall()]
     cur_post_count = g.db.execute('select count(post_id) from postit')
     for row in cur_post_count.fetchall():
         stat_post_count = row[0]
-    return render_template('statistics.html', stat_post_it=stat_post_count)
+    if request.method == 'POST':
+        all_new_post_its = []
+        if request.form.get('owner'):
+            owner = request.form.get('owner')
+            for postit in all_post_its:
+                if (owner.lower() in postit['owner'].lower() and
+                   postit not in all_new_post_its):
+                    all_new_post_its.append(postit)
+        if request.form.get('text'):
+            text = request.form.get('text')
+            for postit in all_post_its:
+                if (text.lower() in postit['text'].lower() and
+                   postit not in all_new_post_its):
+                    all_new_post_its.append(postit)
+        return render_template('statistics.html',
+                               all_post_its=all_new_post_its,
+                               stat_post_count=stat_post_count)
+    return render_template(
+        'statistics.html', stat_post_count=stat_post_count,
+        all_post_its=all_post_its)
 
 
-@app.route('/charts/post_it_by_user_pie.svg')
+@app.route('/charts/post_it_by_user.svg')
 @auth
-def post_it_by_user_pie():
+def post_it_by_user():
     """Display a graph for the statistics page."""
-    post_it_by_user_pie = pygal.Pie(style=CleanStyle)
-    post_it_by_user_pie.title = 'Nombre de post-it par personne'
+    post_it_by_user = pygal.HorizontalBar(style=CleanStyle, show_legend=False)
+    post_it_by_user.title = 'Nombre de post-it par personne'
     cur_post_owner = g.db.execute(
-        "select owner, count(post_id) from postit group by owner")
+        "select p.owner, code_color, count(post_id) "
+        "from postit p, color c "
+        "where p.owner=c.owner "
+        "group by p.owner, code_color")
     for row in cur_post_owner.fetchall():
-        post_it_by_user_pie.add(row[0], row[1])
-    return post_it_by_user_pie.render_response()
+        post_it_by_user.add(
+            row[0], [{'value': row[2], 'style': 'fill: {}'.format(row[1])}])
+    return post_it_by_user.render_response()
 
 
 @app.route('/modify_post_it/<int:post_id>', methods=['GET', 'POST'])
