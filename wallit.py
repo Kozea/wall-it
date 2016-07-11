@@ -221,18 +221,25 @@ def display_stats():
         stat_post_count = row[0]
     if request.method == 'POST':
         all_new_post_its = []
-        if request.form.get('owner'):
-            owner = request.form.get('owner')
+        owner = request.form.get('owner', None)
+        text = request.form.get('text', None)
+        if text and owner:
             for postit in all_post_its:
-                if (owner.lower() in postit['owner'].lower() and
-                   postit not in all_new_post_its):
-                    all_new_post_its.append(postit)
-        if request.form.get('text'):
-            text = request.form.get('text')
-            for postit in all_post_its:
-                if (text.lower() in postit['text'].lower() and
-                   postit not in all_new_post_its):
-                    all_new_post_its.append(postit)
+                if postit not in all_new_post_its:
+                    if (owner.lower() in postit['owner'].lower() and
+                       text.lower() in postit['text'].lower()):
+                        all_new_post_its.append(postit)
+        else:
+            if owner:
+                for postit in all_post_its:
+                    if (owner.lower() in postit['owner'].lower() and
+                       postit not in all_new_post_its):
+                        all_new_post_its.append(postit)
+            if text:
+                for postit in all_post_its:
+                    if (text.lower() in postit['text'].lower() and
+                       postit not in all_new_post_its):
+                        all_new_post_its.append(postit)
         return render_template('statistics.html',
                                all_post_its=all_new_post_its,
                                stat_post_count=stat_post_count)
