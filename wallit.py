@@ -350,8 +350,10 @@ def modify_label(label_id):
         color = request.form.get('color')
         text = request.form.get('text')
         for label in session.get('job_panel'):
-            label[str(label_id)]['text'] = text
-            label[str(label_id)]['color'] = color
+            if label.get(str(label_id)):
+                label[str(label_id)]['text'] = text
+                label[str(label_id)]['color'] = color
+                break
         return redirect(url_for('job_panel'))
     return render_template(
         'meeting/modify_label.html', label_id=label_id, color=color, text=text)
