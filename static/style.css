@@ -104,6 +104,14 @@ nav ul li:hover a {
   color:#5C5C5C;
 }
 
+section#tips {
+  position: fixed;
+  top: 0;
+  right: 500px;
+  width: 250px;
+  font-size: 14px;
+}
+
 /* main */
 main .wall {
   border: 1px #5C5C5C solid;

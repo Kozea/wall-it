@@ -11,9 +11,16 @@ $(document).ready(function() {
   var defaultMaxScale = 1;
   var defaultMinScale = 0.3;
   var defaultScaling = 0.02;
+  var $tips = "<section id='tips'>"+
+    "<p>Clic GAUCHE maintenu pour déplacer un post-it.</p>"+
+    "<p>Clic MOLETTE maintenu pour déplacer le panneau principal.</p>"+
+    "</section>"
 
   $('main').css('height', getElemFloatCss('.wall', 'height') * getWallScale() + 'px');
   $('main').css('width', getElemFloatCss('.wall', 'width') * getWallScale() + 'px');
+
+  $('header').append($tips);
+  $('#tips').hide().fadeIn(1000);
 
   $('article').draggable({
     cursor: 'move',
