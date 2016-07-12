@@ -107,7 +107,7 @@ nav ul li:hover a {
 section#tips {
   position: fixed;
   top: 0;
-  right: 500px;
+  left: 1300px;
   width: 250px;
   font-size: 14px;
 }

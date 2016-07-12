@@ -12,8 +12,8 @@ $(document).ready(function() {
   var defaultMinScale = 0.3;
   var defaultScaling = 0.02;
   var $tips = "<section id='tips'>"+
-    "<p>Clic GAUCHE maintenu pour déplacer un post-it.</p>"+
-    "<p>Clic MOLETTE maintenu pour déplacer le panneau principal.</p>"+
+    "<p><b>- Clic GAUCHE maintenu</b> pour déplacer un post-it.</p>"+
+    "<p><b>- Clic MOLETTE maintenu</b> pour déplacer le panneau principal.</p>"+
     "</section>"
 
   $('main').css('height', getElemFloatCss('.wall', 'height') * getWallScale() + 'px');
