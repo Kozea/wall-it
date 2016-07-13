@@ -27,7 +27,7 @@ $(document).ready(function() {
     getPopUp($link);
   });
 
-  $('#last_li').on('mousedown', function(e) {
-    $(this).css('box-shadow', 'none');
+  $('#last_li > a').on('mousedown', function(e) {
+    $('#last_li').css('box-shadow', 'none');
   });
 });
