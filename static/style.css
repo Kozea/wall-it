@@ -106,9 +106,10 @@ nav ul li:hover a {
 
 section#tips {
   position: fixed;
+  margin: 6px;
   top: 0;
-  left: 700px;
-  width: 250px;
+  left: 650px;
+  width: 350px;
   font-size: 14px;
 }
 
@@ -274,12 +275,21 @@ select:focus, textarea:focus {
   outline: none;
 }
 
+fieldset {
+  border: 1px solid #848484;
+  border-radius: 2px;
+  text-align: center;
+  padding-right: 3px;
+  padding-left: 18px
+}
+
 input[type="submit"] {
   background: #56D8C3;
   border: none;
   cursor: pointer;
   font-size: 15px;
   padding: 8px 15px;
+  margin: 4px;
 }
 
 input[type="color"] {
@@ -288,4 +298,30 @@ input[type="color"] {
   height: 35px;
   vertical-align: middle;
   width: 35px;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+input[type="radio"]:checked + label{
+  opacity: 0.6;
+}
+
+table {
+  width: 100%;
+}
+
+tr {
+  width: 33.3333%;
+}
+
+td > label {
+  margin: 6px 0 6px;
+  padding: 0;
+  width: 90%;
+  height: 30px;
+  cursor: pointer;
+  border: 1px solid #848484;
+  border-radius: 2px;
 }

@@ -1,8 +1,47 @@
+<script type="text/javascript">
+  $('td').each(function() {
+    var color = $(this).find('input').val();
+    $(this).find('label').css({'background-color': color, 'color': color});
+  });
+</script>
+
 <div class="popup">
   <h1>Ajouter un post-it</h1>
   <form action="{{ url_for('new_label') }}" method="post">
     <label>Texte<textarea name="text" rows=5 cols=40 required autofocus></textarea></label>
-    <label>Couleur<input type="color" name="color" value="#ffffff" required></label>
+    <fieldset>
+      <legend>Couleur</legend>
+      <table>
+        <tr>
+          <td>
+            <input type="radio" id="blanc_" name="color" value="#ffffff" />
+            <label for="blanc_">Blanc</label>
+          </td>
+          <td>
+            <input type="radio" id="vert_" name="color" value="#44BD1C" checked/>
+            <label for="vert_">Vert</label>
+          </td>
+          <td>
+            <input type="radio" id="bleu_" name="color" value="#32B7E3" />
+            <label for="bleu_">Bleu</label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="radio" id="jaune_" name="color" value="#E7ED42" />
+            <label for="jaune_">Jaune</label>
+          </td>
+          <td>
+            <input type="radio" id="orange_" name="color" value="#E35E32" />
+            <label for="orange_">Orange</label>
+          </td>
+          <td>
+            <input type="radio" id="fushia_" name="color" value="#ED4292" />
+            <label for="fushia_">Fushia</label>
+          </td>
+        </tr>
+      </table>
+    </fieldset>
     <input type="submit" value="Ajouter">
   </form>
 </div>
