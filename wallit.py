@@ -6,10 +6,11 @@ import random as rand
 
 from datetime import datetime
 from flask import (
-    Flask, request, session, g, redirect, url_for, render_template, flash)
+    flash, Flask, g, redirect, render_template, request, send_file,
+    session, url_for)
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
-from os.path import expanduser
+from os import listdir, remove
 from pygal.style import CleanStyle
 from weasyprint import HTML, CSS
 
@@ -378,9 +379,8 @@ def print_panel():
         if request.form.get('title'):
             today = datetime.today().strftime('%d-%m-%Y_%H:%M:%S')
             content_string = request.form.get('html_to_print')
-            doc = expanduser('~/Documents/')
-            my_file = "{}{}_{}.pdf".format(
-                doc, request.form.get('title'), today)
+            file_ = "uploads/{}_{}.pdf".format(
+                request.form.get('title'), today)
             data_style = ""
             my_style = open('static/style.css', 'r')
             lines = my_style.readlines()
@@ -395,9 +395,13 @@ def print_panel():
                     size: A3 landscape;
                 }"""
             HTML(string=content_string).write_pdf(
-                target=my_file, stylesheets=[CSS(string=data_style)])
+                target=file_, stylesheets=[CSS(string=data_style)])
             del(session['job_panel'])
-            return redirect(url_for('job_panel'))
+            tmp_file = send_file(file_, as_attachment=True)
+            filelist = [f for f in listdir("uploads/") if f.endswith('.pdf')]
+            for f in filelist:
+                remove('uploads/{}'.format(f))
+            return tmp_file
     return render_template('meeting/print.html')
 
 

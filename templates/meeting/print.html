@@ -2,6 +2,9 @@
   $(document).ready(function() {
     $('form').on('submit', function() {
       $('input[id=html-to-print]').val('<main>'+$('main').html()+'</main>')
+      $('.popup').remove();
+      $('header, main, footer').css({'pointer-events': 'auto', 'opacity': '1'});
+      $('html').css('background-color', 'transparent');
     });
   });
 </script>
