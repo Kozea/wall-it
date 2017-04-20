@@ -59,7 +59,8 @@ def auth(function):
     """Wrapper checking if the user is logged in."""
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if session.get('users') and session.get('person'):
+        testing = app.config['TESTING']
+        if session.get('users') and session.get('person') or testing:
             return function(*args, **kwargs)
         return redirect(FLOW.step1_get_authorize_url())
     return wrapper
@@ -82,7 +83,7 @@ def oauth2callback():
             "&pageSize=500")
         users_data = json.loads(users_content.decode('utf-8'))
         session['users'] = []
-        for connection in users_data['connections']:
+        for connection in users_data.get('connections', []):
             if 'names' in connection and 'emailAddresses' in connection:
                 for address in connection['emailAddresses']:
                     if address['value'].endswith('@kozea.fr'):
