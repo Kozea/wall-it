@@ -1,5 +1,0 @@
-flask
-pygal
-oauth2client
-httplib2
-weasyprint

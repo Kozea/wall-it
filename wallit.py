@@ -1,19 +1,18 @@
-import sqlite3
-import httplib2
 import json
-import pygal
-import random as rand
-
+import random
+import sqlite3
 from datetime import datetime
-from flask import (
-    flash, Flask, g, redirect, render_template, request, send_file,
-    session, url_for)
 from functools import wraps
-from oauth2client.client import OAuth2WebServerFlow
 from os import listdir, remove
-from pygal.style import CleanStyle
-from weasyprint import HTML, CSS
 
+import httplib2
+import pygal
+from flask import (
+    Flask, flash, g, redirect, render_template, request, send_file, session,
+    url_for)
+from oauth2client.client import OAuth2WebServerFlow
+from pygal.style import CleanStyle
+from weasyprint import CSS, HTML
 
 app = Flask(__name__)
 app.config.from_envvar('WALLIT_SETTINGS')
@@ -327,9 +326,9 @@ def job_panel():
 def new_label():
     if request.method == 'POST':
         already_used_rand = []
-        random_id = rand.randint(0, 10000)
+        random_id = random.randint(0, 10000)
         while random_id in already_used_rand:
-            random_id = rand.randint(0, 10000)
+            random_id = random.randint(0, 10000)
         text = request.form.get('text')
         color = request.form.get('color')
         session['job_panel'].append({str(random_id): {
