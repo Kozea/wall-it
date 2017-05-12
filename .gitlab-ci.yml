@@ -5,10 +5,6 @@ stages:
 .image: &image_deploy_jobs
   image: debian:latest
 
-.tags: &tags
-  tags:
-    - claire
-
 deploy_test:
   <<: *image_deploy_jobs
   stage: deploy_test
@@ -17,7 +13,6 @@ deploy_test:
   script:
     - "res_curl=`curl -m 3600 -H 'Content-Type: application/json' -X POST -d '{\"token\":\"\'\"$TOKEN\"\'\", \"url\":\"\'\"$CI_REPOSITORY_URL\"\'\", \"build_stage\":\"\'\"$CI_JOB_STAGE\"\'\", \"project_name\":\"\'\"$CI_PROJECT_NAME\"\'\", \"branch\":\"\'\"$CI_COMMIT_REF_NAME\"\'\"}' $GERALDINE/deploy | jq -r \'.success\'` && branch_name=`echo $CI_COMMIT_REF_NAME | tr -cd '[[:alnum:]]'` && get=`curl -s -o -I -w \"%{http_code}\" http://test-$CI_PROJECT_NAME-$branch_name.kozea.fr` && ([[ $get = 302 || $get = 200 ]] && [[ $res_curl = 0 ]]) && exit_val=0 || exit_val=1 && exit $exit_val"
   dependencies: []
-  <<: *tags
 
 deploy_prod:
   <<: *image_deploy_jobs
@@ -29,4 +24,3 @@ deploy_prod:
   dependencies: []
   only:
     - master
-  <<: *tags
