@@ -5,6 +5,27 @@ stages:
 .image: &image_deploy_jobs
   image: debian:latest
 
+image: paradoxxxzero/python-node-yarn-postgresql:latest
+
+.artifacts: &artifacts
+  artifacts:
+    paths:
+      - .env/
+
+install:
+  stage: install
+  script:
+    - make install
+  <<: *artifacts
+
+test:
+  stage: test
+  script:
+    - make check
+  dependencies:
+    - install
+
+
 deploy_test:
   <<: *image_deploy_jobs
   stage: deploy_test
