@@ -1,4 +1,6 @@
 stages:
+  - install
+  - test
   - deploy_test
   - deploy_prod
 
