@@ -7,9 +7,8 @@ from os import listdir, remove
 
 import httplib2
 import pygal
-from flask import (
-    Flask, flash, g, redirect, render_template, request, send_file, session,
-    url_for)
+from flask import (Flask, flash, g, redirect, render_template, request,
+                   send_file, session, url_for)
 from oauth2client.client import OAuth2WebServerFlow
 from pygal.style import CleanStyle
 from weasyprint import CSS, HTML
