@@ -1,7 +1,6 @@
 stages:
   - install
   - test
-  - deploy_test
   - deploy_prod
 
 .image: &image_deploy_jobs
@@ -30,15 +29,6 @@ test:
 
 .image: &image_deploy_jobs
   image: debian:latest
-
-deploy_test:
-  <<: *image_deploy_jobs
-  stage: deploy_test
-  before_script:
-    - apt-get update && apt-get install -y wget make
-  script:
-    - make deploy-test
-  dependencies: []
 
 deploy_prod:
   <<: *image_deploy_jobs
